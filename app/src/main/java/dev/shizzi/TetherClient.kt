@@ -29,6 +29,9 @@ data class SessionUiState(
     val clientCount: Int = 0,
 
     val traffic: Traffic = Traffic(),
+
+    /** Wall-clock time (ms) the session became connected, or 0 when not connected. */
+    val connectedSince: Long = 0L,
 ) {
 
     val canStart: Boolean get() = shizukuState is ShizukuState.Ready && !isBusy
@@ -45,7 +48,15 @@ fun SessionUiState.asStopped(): SessionUiState = copy(
     isWaitingForUsb = false,
     clientCount = 0,
     traffic = Traffic(),
+    connectedSince = 0L,
 )
+
+/** Records when the session first became connected, and forgets it once it is not. */
+fun SessionUiState.stampConnectedSince(now: Long): SessionUiState = when {
+    status != UiStatus.CONNECTED -> if (connectedSince == 0L) this else copy(connectedSince = 0L)
+    connectedSince == 0L -> copy(connectedSince = now)
+    else -> this
+}
 
 fun SessionUiState.applyOutcome(outcome: Result<String>): SessionUiState {
     val failure = outcome.exceptionOrNull()

@@ -42,10 +42,52 @@ class SessionService : Service() {
 
     private val sessionLock = Mutex()
 
+    @Volatile
+    private var timeLimitMinutes = 0
+
+    @Volatile
+    private var dataLimitMb = 0
+
+    /** Set once a limit has asked the session to stop, so it asks only once. */
+    @Volatile
+    private var isLimitStopRequested = false
+
     override fun onCreate() {
         super.onCreate()
         controller.onSessionLost = ::handleSessionLost
         liveService = this
+        followLimits()
+    }
+
+    /** Keeps the user's session limits current, including changes made mid-session. */
+    private fun followLimits() {
+        scope.launch {
+            settingsStore().settings.collect { settings ->
+                timeLimitMinutes = settings.timeLimitMinutes
+                dataLimitMb = settings.dataLimitMb
+            }
+        }
+    }
+
+    /** Stops the session the same way the notification's Stop button does once a limit is hit. */
+    private fun enforceLimits() {
+        if (isLimitStopRequested || isStopping) return
+
+        val reason = SessionLimits.reached(
+            timeLimitMinutes = timeLimitMinutes,
+            dataLimitMb = dataLimitMb,
+            state = internalState.value,
+            now = System.currentTimeMillis(),
+        ) ?: return
+
+        isLimitStopRequested = true
+        SessionLog.info("session limit reached: $reason; stopping")
+        notificationManager().notify(
+            LIMIT_NOTIFICATION_ID,
+            notification.buildLimitReached(reason),
+        )
+        runCatching { stop(this) }
+            .onFailure { SessionLog.error("could not stop at limit: ${it.message}") }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -75,6 +117,7 @@ class SessionService : Service() {
             return
         }
         val attempt = ++generation
+        isLimitStopRequested = false
         internalState.update {
             it.copy(isBusy = true, status = UiStatus.LOADING, lastError = "", detail = "")
         }
@@ -98,7 +141,9 @@ class SessionService : Service() {
                 )
             }
 
-            internalState.update { current -> current.applyOutcome(outcome) }
+            internalState.update { current ->
+                current.applyOutcome(outcome).stampConnectedSince(System.currentTimeMillis())
+            }
             publishState()
             announceOutcome()
             followStatus()
@@ -108,9 +153,12 @@ class SessionService : Service() {
     private fun followStatus() = statusPoller.follow(
         isConnected = { internalState.value.status == UiStatus.CONNECTED },
         onStatus = { outcome ->
-            internalState.update { current -> current.applyOutcome(outcome) }
+            internalState.update { current ->
+                current.applyOutcome(outcome).stampConnectedSince(System.currentTimeMillis())
+            }
             publishState()
             if (internalState.value.status == UiStatus.READY) finishEndedSession()
+            enforceLimits()
         },
     )
 
@@ -169,7 +217,7 @@ class SessionService : Service() {
                 isBusy = false,
                 status = UiStatus.ERROR,
                 interfaceName = "",
-                lastError = "Session ended unexpectedly — dropping the hotspot…",
+                lastError = tr("Session ended unexpectedly — dropping the hotspot…"),
             )
         }
         publishState()
@@ -215,6 +263,7 @@ class SessionService : Service() {
 
     companion object {
         private const val NOTIFICATION_ID = 1
+        private const val LIMIT_NOTIFICATION_ID = 2
         const val ACTION_STOP = "dev.shizzi.STOP_SESSION"
         const val EXTRA_REPORT_AS = "reportAs"
 

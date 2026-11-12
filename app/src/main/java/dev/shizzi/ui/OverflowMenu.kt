@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,7 +47,7 @@ fun OverflowMenu(
     Box {
         ShizziIconButton(
             icon = Icons.Filled.MoreVert,
-            contentDescription = "More options",
+            contentDescription = tr("More options"),
             onClick = { isOpen = true },
 
             tint = if (isMarked) colors.primary else colors.onSurface,

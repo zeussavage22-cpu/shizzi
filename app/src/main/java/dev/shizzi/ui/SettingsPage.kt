@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
@@ -59,6 +61,7 @@ data class SettingsState(
     val usbTethering: UsbTethering,
     val isRunningDiagnostics: Boolean,
     val automation: AutomationState,
+    val limits: LimitsState = LimitsState(timeLimitMinutes = 0, dataLimitMb = 0),
 )
 
 data class SettingsActions(
@@ -75,6 +78,7 @@ data class SettingsActions(
     val onShizukuAction: () -> Unit,
     val onRestartOnboarding: () -> Unit,
     val automation: AutomationActions,
+    val limits: LimitsActions = LimitsActions(onSetTimeLimit = {}, onSetDataLimit = {}),
 )
 
 @Composable
@@ -94,7 +98,7 @@ fun SettingsPage(
 
     Column(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
 
-        ScreenHeader(title = "Settings", onBack = onBack)
+        ScreenHeader(title = tr("Settings"), onBack = onBack)
 
         Column(
             modifier = Modifier
@@ -123,7 +127,7 @@ private fun settingsSections(
     actions: SettingsActions,
     toasts: ToastState,
 ): List<SettingsSectionSpec> = listOf(
-    SettingsSectionSpec("Tethering") {
+    SettingsSectionSpec(tr("Tethering")) {
         TetheringSection(
             selected = state.usbTethering,
             onSelect = actions.onSetUsbTethering,
@@ -131,7 +135,11 @@ private fun settingsSections(
         )
     },
 
-    SettingsSectionSpec("Appearance") {
+    SettingsSectionSpec(tr("Session limits")) {
+        LimitsSection(state = state.limits, actions = actions.limits)
+    },
+
+    SettingsSectionSpec(tr("Appearance")) {
         AppearanceSection(
             state = AppearanceState(
                 theme = state.theme,
@@ -148,7 +156,7 @@ private fun settingsSections(
         )
     },
 
-    SettingsSectionSpec("Permissions") {
+    SettingsSectionSpec(tr("Permissions")) {
         PermissionsSection(
             state = PermissionsSectionState(
                 shizuku = state.shizuku,
@@ -159,7 +167,7 @@ private fun settingsSections(
         )
     },
 
-    SettingsSectionSpec("Advanced") {
+    SettingsSectionSpec(tr("Advanced")) {
         VpnSection(selected = state.vpnMode, onSelect = actions.onSetVpnMode)
 
         AutomationSection(
@@ -169,11 +177,11 @@ private fun settingsSections(
         )
     },
 
-    SettingsSectionSpec("Developer") {
+    SettingsSectionSpec(tr("Developer")) {
         DeveloperSection(isLogging = state.isLogging, actions = actions)
     },
 
-    SettingsSectionSpec("About") { AboutSection(toasts) },
+    SettingsSectionSpec(tr("About")) { AboutSection(toasts) },
 )
 
 /** Staggers each section in on first composition so the page assembles itself. */
@@ -222,23 +230,23 @@ private fun Modifier.inert(isBusy: Boolean): Modifier = when {
 @Composable
 private fun DeveloperSection(isLogging: Boolean, actions: SettingsActions) {
     SettingsToggle(
-        label = SettingsText(title = "Logging"),
+        label = SettingsText(title = tr("Logging")),
         isChecked = isLogging,
         onCheckedChange = actions.onSetLogging,
     )
 
     SettingsAction(
-        label = SettingsText(title = "View logs"),
+        label = SettingsText(title = tr("View logs")),
         onClick = actions.onOpenLog,
     )
 
     SettingsAction(
-        label = SettingsText(title = "Run diagnostics"),
+        label = SettingsText(title = tr("Run diagnostics")),
         onClick = actions.onRunProbes,
     )
 
     SettingsAction(
-        label = SettingsText(title = "Restart onboarding"),
+        label = SettingsText(title = tr("Restart onboarding")),
         onClick = actions.onRestartOnboarding,
     )
 }
@@ -257,13 +265,13 @@ private fun AboutSection(toasts: ToastState) {
     )
 
     SettingsAction(
-        label = SettingsText(title = "Report a bug"),
+        label = SettingsText(title = tr("Report a bug")),
         isExternal = true,
-        onClick = { open("the issue tracker", ISSUE_URL) },
+        onClick = { open(tr("the issue tracker"), ISSUE_URL) },
     )
 
     SettingsAction(
-        label = SettingsText(title = "Author", subtitle = "carlelieser.dev"),
+        label = SettingsText(title = tr("Author"), subtitle = "carlelieser.dev"),
         isExternal = true,
         onClick = { open("carlelieser.dev", AUTHOR_URL) },
     )

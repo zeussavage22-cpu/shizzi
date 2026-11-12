@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -63,7 +65,7 @@ fun ShizziCompactIconButton(
 fun BackButton(onBack: () -> Unit) {
     ShizziIconButton(
         icon = Icons.AutoMirrored.Filled.ArrowBack,
-        contentDescription = "Back",
+        contentDescription = tr("Back"),
         onClick = onBack,
     )
 }

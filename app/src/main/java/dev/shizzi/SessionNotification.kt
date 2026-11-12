@@ -26,55 +26,77 @@ class SessionNotification(private val context: Context) {
             .build()
     }
 
+    /** A one-off notice that a session limit ended sharing. */
+    fun buildLimitReached(reason: LimitReason): Notification {
+        createChannel()
+
+        return Notification.Builder(context, CHANNEL_ID)
+            .setContentTitle(SessionLimits.describe(reason))
+            .setContentText(tr("Sharing was stopped automatically.", "Se dejó de compartir automáticamente."))
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentIntent(openAppIntent())
+            .setAutoCancel(true)
+            .build()
+    }
+
     private fun titleFor(state: SessionUiState, isStopping: Boolean): String =
         when (state.status) {
             UiStatus.CONNECTED -> connectedTitle(state)
-            UiStatus.LOADING -> if (isStopping) "Cleaning up…" else "Getting ready…"
-            UiStatus.ERROR -> "Session ended"
-            UiStatus.READY -> "Session ended"
+            UiStatus.LOADING -> if (isStopping) tr("Cleaning up…") else tr("Getting ready…")
+            UiStatus.ERROR -> tr("Session ended")
+            UiStatus.READY -> tr("Session ended")
         }
 
     private fun connectedTitle(state: SessionUiState): String = when {
-        state.isWaitingForUsb -> "Waiting for USB"
-        state.isVpnBypassed -> "Connected · VPN ignored"
-        state.isVpnBound -> "Connected · VPN"
-        else -> "Connected"
+        state.isWaitingForUsb -> tr("Waiting for USB")
+        state.isVpnBypassed -> tr("Connected · VPN ignored")
+        state.isVpnBound -> tr("Connected · VPN")
+        else -> tr("Connected")
     }
 
     private fun bodyFor(state: SessionUiState, isStopping: Boolean): String = when {
         state.lastError.isNotEmpty() -> userFacingError(state.lastError)
         state.status == UiStatus.LOADING -> loadingBody(isStopping)
-        state.isWaitingForUsb -> "Connect over USB within $USB_GRACE_MINUTES minutes to keep sharing"
+        state.isWaitingForUsb -> tr(
+            "Connect over USB within $USB_GRACE_MINUTES minutes to keep sharing",
+            "Conecta por USB en menos de $USB_GRACE_MINUTES minutos para seguir compartiendo",
+        )
         state.status == UiStatus.CONNECTED -> connectedBody(state)
-        else -> "Not sharing"
+        else -> tr("Not sharing")
     }
 
     private fun userFacingError(raw: String): String = when {
-        raw.contains(EXCEPTION_MARKER) -> "Something went wrong. Check the app for details."
+        raw.contains(EXCEPTION_MARKER) -> tr("Something went wrong. Check the app for details.")
         else -> raw
     }
 
     private fun loadingBody(isStopping: Boolean): String =
-        if (isStopping) "Turning the hotspot off…" else "Turning the hotspot on…"
+        if (isStopping) tr("Turning the hotspot off…") else tr("Turning the hotspot on…")
 
     private fun connectedBody(state: SessionUiState): String = when (state.clientCount) {
-        0 -> "No devices connected"
+        0 -> tr("No devices connected")
         else -> "${deviceCount(state.clientCount)} · " +
             "$DOWN_ARROW ${Traffic.format(state.traffic.down)} · " +
             "$UP_ARROW ${Traffic.format(state.traffic.up)}"
     }
 
     private fun deviceCount(clients: Int): String = when (clients) {
-        1 -> "1 device"
-        else -> "$clients devices"
+        1 -> tr("1 device")
+        else -> tr("$clients devices", "$clients dispositivos")
     }
 
     fun describeLoss(problem: String?): String = when (problem) {
-        null -> "Shizuku stopped, so the session ended. The hotspot was turned off. " +
-            "Start again when you are ready."
+        null -> tr(
+            "Shizuku stopped, so the session ended. The hotspot was turned off. " +
+                "Start again when you are ready.",
+        )
 
-        else -> "The session ended but the hotspot may still be on: $problem — " +
-            "turn it off in Settings."
+        else -> tr(
+            "The session ended but the hotspot may still be on: $problem — " +
+                "turn it off in Settings.",
+            "La sesión terminó, pero el punto de acceso puede seguir encendido: $problem — " +
+                "apágalo en Ajustes.",
+        )
     }
 
     private fun openAppIntent(): PendingIntent = PendingIntent.getActivity(
@@ -86,7 +108,7 @@ class SessionNotification(private val context: Context) {
 
     private fun stopAction(): Notification.Action = Notification.Action.Builder(
         null,
-        "Stop",
+        tr("Stop"),
         PendingIntent.getService(
             context,
             1,
@@ -100,9 +122,9 @@ class SessionNotification(private val context: Context) {
 
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Tethering session",
+            tr("Tethering session"),
             NotificationManager.IMPORTANCE_LOW,
-        ).apply { description = "Shown while a tethering session is running" }
+        ).apply { description = tr("Shown while a tethering session is running") }
 
         notificationManager().createNotificationChannel(channel)
     }

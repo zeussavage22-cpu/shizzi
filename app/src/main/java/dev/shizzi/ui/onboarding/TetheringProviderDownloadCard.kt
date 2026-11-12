@@ -1,5 +1,7 @@
 package dev.shizzi.ui.onboarding
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,7 +34,7 @@ fun TetheringProviderDownloadCard(state: CompatibilityState, hasNetwork: Boolean
             verticalArrangement = Arrangement.spacedBy(ShizziTheme.spacing.xs),
         ) {
             Text(
-                text = "Tethering module",
+                text = tr("Tethering module"),
                 style = ShizziTheme.typography.subheading,
                 color = ShizziTheme.colors.onSurface,
             )
@@ -80,19 +82,23 @@ private fun FailureDetail(reason: String) {
 }
 
 private fun bodyFor(state: CompatibilityState, hasNetwork: Boolean): String = when {
-    state is CompatibilityState.Downloading -> "Downloading the module…"
+    state is CompatibilityState.Downloading -> tr("Downloading the module…")
 
     state is CompatibilityState.DownloadFailed && state.failure.isConnectivity ->
-        "Couldn't reach the network to download the module. Reconnect and try again."
+        tr("Couldn't reach the network to download the module. Reconnect and try again.")
 
     state is CompatibilityState.DownloadFailed ->
-        "The download couldn't be verified, so nothing was installed."
+        tr("The download couldn't be verified, so nothing was installed.")
 
     !hasNetwork ->
-        "Your phone needs the newer tethering module to route the hotspot. " +
-            "Connect to a network to download it."
+        tr(
+            "Your phone needs the newer tethering module to route the hotspot. " +
+                "Connect to a network to download it.",
+        )
 
     else ->
-        "Your phone can run this app once it has a newer tethering module. " +
-            "It's about 3 MB, and installing it needs one restart."
+        tr(
+            "Your phone can run this app once it has a newer tethering module. " +
+                "It's about 3 MB, and installing it needs one restart.",
+        )
 }

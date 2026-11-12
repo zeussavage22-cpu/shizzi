@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
@@ -99,7 +101,7 @@ private fun StatusLabel(status: String) {
     ) { word ->
         Text(
             text = buildAnnotatedString {
-                append("STATUS ")
+                append(tr("STATUS "))
                 withStyle(
                     SpanStyle(color = colors.onSurface, fontWeight = FontWeight.W700),
                 ) {
@@ -154,7 +156,7 @@ private fun TunnelSegment(name: String) {
     val interaction = remember { MutableInteractionSource() }
 
     Text(
-        text = if (isShowingName) name.uppercase() else "TUNNEL ACTIVE",
+        text = if (isShowingName) name.uppercase() else tr("TUNNEL ACTIVE"),
         style = ShizziTheme.typography.caption,
         color = ShizziTheme.colors.onSurfaceMuted,
         textAlign = TextAlign.Center,
@@ -179,8 +181,8 @@ private fun StatusDivider() {
 }
 
 private fun statusWord(state: SessionUiState): String = when (state.status) {
-    UiStatus.CONNECTED -> if (state.isWaitingForUsb) "Waiting for USB" else "Connected"
-    UiStatus.READY -> "Ready"
-    UiStatus.LOADING -> "Starting"
-    UiStatus.ERROR -> "Failed"
+    UiStatus.CONNECTED -> if (state.isWaitingForUsb) tr("Waiting for USB") else tr("Connected")
+    UiStatus.READY -> tr("Ready")
+    UiStatus.LOADING -> tr("Starting")
+    UiStatus.ERROR -> tr("Failed")
 }

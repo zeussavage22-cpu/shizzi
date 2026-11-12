@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,7 +31,7 @@ import dev.shizzi.ui.theme.standardSpring
 import dev.shizzi.ui.theme.standardTween
 
 private fun buttonLabel(status: UiStatus): String =
-    if (status == UiStatus.CONNECTED) "Stop" else "Start"
+    if (status == UiStatus.CONNECTED) tr("Stop") else tr("Start")
 
 private fun buttonState(state: SessionUiState): ConnectButtonState = when {
     state.status == UiStatus.LOADING -> ConnectButtonState.LOADING
@@ -101,7 +103,7 @@ private fun HomeHeader(
 
         ShizziIconButton(
             icon = Icons.Filled.Settings,
-            contentDescription = "Settings",
+            contentDescription = tr("Settings"),
             onClick = onOpenSettings,
             tint = ShizziTheme.colors.onSurfaceMuted,
         )
@@ -152,6 +154,10 @@ private fun HomeBody(state: SessionUiState, actions: HomeActions) {
             RiseIn(isVisible = isStarting) {
                 CancelButton(onClick = actions.onCancel)
             }
+        }
+
+        RiseIn(isVisible = state.status == UiStatus.CONNECTED) {
+            SessionStats(state = state)
         }
     }
 }

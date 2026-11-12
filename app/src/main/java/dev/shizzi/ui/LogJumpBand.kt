@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -72,7 +74,7 @@ fun JumpBand(
         ) {
 
             Text(
-                text = if (isTop) "SCROLL TO TOP" else "SCROLL TO BOTTOM",
+                text = if (isTop) tr("SCROLL TO TOP") else tr("SCROLL TO BOTTOM"),
                 style = ShizziTheme.typography.label,
                 color = colors.onSurface,
                 modifier = Modifier

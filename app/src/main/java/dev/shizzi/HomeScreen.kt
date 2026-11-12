@@ -11,6 +11,8 @@ import dev.shizzi.ui.EasterEggPage
 import dev.shizzi.ui.HandleBack
 import dev.shizzi.ui.HomeActions
 import dev.shizzi.ui.HomePage
+import dev.shizzi.ui.LimitsActions
+import dev.shizzi.ui.LimitsState
 import dev.shizzi.ui.LogActions
 import dev.shizzi.ui.LogPage
 import dev.shizzi.ui.Screen
@@ -50,6 +52,8 @@ data class AppActions(
     val onRestartOnboarding: () -> Unit,
     val onSetAutomation: (Boolean) -> Unit,
     val onRegenerateAutomationToken: () -> Unit,
+    val onSetTimeLimit: (Int) -> Unit = {},
+    val onSetDataLimit: (Int) -> Unit = {},
 )
 
 
@@ -160,6 +164,10 @@ private fun settingsState(state: AppState): SettingsState {
             isEnabled = settings.isAutomationEnabled,
             token = settings.automationToken,
         ),
+        limits = LimitsState(
+            timeLimitMinutes = settings.timeLimitMinutes,
+            dataLimitMb = settings.dataLimitMb,
+        ),
     )
 }
 
@@ -182,6 +190,10 @@ private fun settingsActions(context: ScreenContext): SettingsActions {
         automation = AutomationActions(
             onSetEnabled = actions.onSetAutomation,
             onRegenerateToken = actions.onRegenerateAutomationToken,
+        ),
+        limits = LimitsActions(
+            onSetTimeLimit = actions.onSetTimeLimit,
+            onSetDataLimit = actions.onSetDataLimit,
         ),
     )
 }

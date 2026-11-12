@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,8 +29,8 @@ fun designLabel(design: DesignLanguage): String = when (design) {
 }
 
 private fun descriptionOf(design: DesignLanguage): String = when (design) {
-    DesignLanguage.NEOBRUTALISM -> "Hard edges, bold borders, offset shadows"
-    DesignLanguage.MATERIAL_EXPRESSIVE -> "Rounded surfaces, tonal color, soft motion"
+    DesignLanguage.NEOBRUTALISM -> tr("Hard edges, bold borders, offset shadows")
+    DesignLanguage.MATERIAL_EXPRESSIVE -> tr("Rounded surfaces, tonal color, soft motion")
 }
 
 @Composable
@@ -39,7 +41,7 @@ fun DesignPicker(
 ) {
     ThemedBottomSheet(onDismiss = onDismiss) {
         Text(
-            text = "Design",
+            text = tr("Design"),
             style = ShizziTheme.typography.heading,
             color = ShizziTheme.colors.onSurface,
         )

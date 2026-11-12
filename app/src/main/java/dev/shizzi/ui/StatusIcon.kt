@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -59,7 +61,7 @@ fun StatusIcon(status: UiStatus, isWaitingForUsb: Boolean) {
     ) { glyph ->
         Icon(
             imageVector = glyph,
-            contentDescription = if (isWaitingForUsb) "Waiting for USB" else descriptionFor(status),
+            contentDescription = if (isWaitingForUsb) tr("Waiting for USB") else descriptionFor(status),
             tint = tint,
             modifier = Modifier
                 .size(StatusIconSize)
@@ -95,10 +97,10 @@ private fun glyphFor(status: UiStatus): ImageVector = when (status) {
 }
 
 private fun descriptionFor(status: UiStatus): String = when (status) {
-    UiStatus.READY -> "Not connected"
-    UiStatus.LOADING -> "Connecting"
-    UiStatus.CONNECTED -> "Connected"
-    UiStatus.ERROR -> "Failed"
+    UiStatus.READY -> tr("Not connected")
+    UiStatus.LOADING -> tr("Connecting")
+    UiStatus.CONNECTED -> tr("Connected")
+    UiStatus.ERROR -> tr("Failed")
 }
 
 @Composable
@@ -120,7 +122,7 @@ fun ShizukuBadge(state: ShizukuState) {
 
 private fun badgeText(state: ShizukuState): String? = when (state) {
     is ShizukuState.Ready -> null
-    is ShizukuState.NotInstalled -> "NO SHIZUKU"
-    is ShizukuState.NotRunning -> "SHIZUKU OFF"
-    is ShizukuState.PermissionRequired -> "PERMISSION NEEDED"
+    is ShizukuState.NotInstalled -> tr("NO SHIZUKU")
+    is ShizukuState.NotRunning -> tr("SHIZUKU OFF")
+    is ShizukuState.PermissionRequired -> tr("PERMISSION NEEDED")
 }

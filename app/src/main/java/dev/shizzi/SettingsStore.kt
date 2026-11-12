@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dev.shizzi.ui.theme.AccentChoice
@@ -32,6 +33,11 @@ data class Settings(
 
     val isAutomationEnabled: Boolean = false,
     val automationToken: String = "",
+
+    /** Stop sharing after this many minutes. 0 = off (the default). */
+    val timeLimitMinutes: Int = 0,
+    /** Stop sharing once this many megabytes have been used. 0 = off (the default). */
+    val dataLimitMb: Int = 0,
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
@@ -99,6 +105,14 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { it[AUTOMATION_TOKEN] = token }
     }
 
+    suspend fun setTimeLimit(minutes: Int) {
+        context.dataStore.edit { it[TIME_LIMIT_MINUTES] = minutes.coerceAtLeast(0) }
+    }
+
+    suspend fun setDataLimit(megabytes: Int) {
+        context.dataStore.edit { it[DATA_LIMIT_MB] = megabytes.coerceAtLeast(0) }
+    }
+
     private fun MutablePreferences.mintTokenIfAbsent() {
         if (!this[AUTOMATION_TOKEN].isNullOrEmpty()) return
 
@@ -117,6 +131,8 @@ internal val USB_TETHERING = stringPreferencesKey("usb_tethering")
 internal val ONBOARDED = booleanPreferencesKey("onboarded")
 internal val AUTOMATION = booleanPreferencesKey("automation")
 internal val AUTOMATION_TOKEN = stringPreferencesKey("automation_token")
+internal val TIME_LIMIT_MINUTES = intPreferencesKey("time_limit_minutes")
+internal val DATA_LIMIT_MB = intPreferencesKey("data_limit_mb")
 
 internal fun toSettings(preferences: Preferences) = Settings(
     theme = runCatching { ThemeChoice.valueOf(preferences[THEME].orEmpty()) }
@@ -131,4 +147,6 @@ internal fun toSettings(preferences: Preferences) = Settings(
     hasCompletedOnboarding = preferences[ONBOARDED] ?: false,
     isAutomationEnabled = preferences[AUTOMATION] ?: false,
     automationToken = preferences[AUTOMATION_TOKEN].orEmpty(),
+    timeLimitMinutes = (preferences[TIME_LIMIT_MINUTES] ?: 0).coerceAtLeast(0),
+    dataLimitMb = (preferences[DATA_LIMIT_MB] ?: 0).coerceAtLeast(0),
 )

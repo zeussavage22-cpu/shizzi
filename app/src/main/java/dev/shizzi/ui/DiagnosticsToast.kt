@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,18 +28,18 @@ fun DiagnosticsToast(
 
             is DiagnosticsState.Running -> Toast(
                 key = ToastKeys.DIAGNOSTICS,
-                message = "Running diagnostics...",
+                message = tr("Running diagnostics..."),
                 duration = ToastDuration.Indefinite,
                 isBusy = true,
             )
 
             is DiagnosticsState.Complete -> Toast(
                 key = ToastKeys.DIAGNOSTICS,
-                message = "Diagnostics completed",
+                message = tr("Diagnostics completed"),
                 detail = phase.path,
 
                 duration = ToastDuration.Indefinite,
-                action = ToastAction("Export") {
+                action = ToastAction(tr("Export")) {
                     (current as? DiagnosticsState.Complete)
                         ?.let { context.exportReport(it.report) }
                 },
@@ -46,7 +48,7 @@ fun DiagnosticsToast(
 
             is DiagnosticsState.Failed -> Toast(
                 key = ToastKeys.DIAGNOSTICS,
-                message = "Diagnostics failed",
+                message = tr("Diagnostics failed"),
                 detail = phase.problem,
                 duration = ToastDuration.Indefinite,
                 onDismiss = onDismiss,

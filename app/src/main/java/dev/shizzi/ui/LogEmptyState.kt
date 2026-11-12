@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,7 +47,7 @@ fun EmptyLog(
         Spacer(Modifier.height(ShizziTheme.spacing.xl))
 
         Text(
-            text = if (isLogging) "No logs yet" else "Logging is disabled",
+            text = if (isLogging) tr("No logs yet") else tr("Logging is disabled"),
             style = ShizziTheme.typography.subheading,
             color = ShizziTheme.colors.onSurface,
         )
@@ -54,7 +56,7 @@ fun EmptyLog(
             Spacer(Modifier.height(ShizziTheme.spacing.sm))
 
             Text(
-                text = "Logs will appear here",
+                text = tr("Logs will appear here"),
                 style = ShizziTheme.typography.body,
                 color = ShizziTheme.colors.onSurfaceMuted,
                 textAlign = TextAlign.Center,
@@ -64,7 +66,7 @@ fun EmptyLog(
         Spacer(Modifier.height(ShizziTheme.spacing.sm))
 
         EmptyAction(
-            label = if (isLogging) "Start a session" else "Enable logging",
+            label = if (isLogging) tr("Start a session") else tr("Enable logging"),
             onClick = if (isLogging) onStartSession else onEnableLogging,
         )
     }

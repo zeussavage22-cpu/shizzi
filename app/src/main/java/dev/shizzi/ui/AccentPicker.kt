@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -49,8 +51,8 @@ private const val MarkEnterScale = 0.4f
 private const val ContrastThreshold = 0.5f
 
 fun accentLabel(accent: AccentChoice): String = when (accent) {
-    AccentChoice.Default -> "Default"
-    AccentChoice.Expressive -> "Wallpaper"
+    AccentChoice.Default -> tr("Default")
+    AccentChoice.Expressive -> tr("Wallpaper")
     is AccentChoice.Custom -> "#%06X".format(accent.argb and 0x00FFFFFF)
 }
 
@@ -60,7 +62,7 @@ fun AccentPicker(state: AccentPickerState, actions: AccentPickerActions) {
 
     ThemedBottomSheet(onDismiss = actions.onDismiss) {
         Text(
-            text = "Accent",
+            text = tr("Accent"),
             style = ShizziTheme.typography.heading,
             color = ShizziTheme.colors.onSurface,
         )

@@ -15,14 +15,14 @@ data class PermissionStatus(
 
 val AppPermission.title: String
     get() = when (this) {
-        AppPermission.NOTIFICATIONS -> "Notifications"
-        AppPermission.BATTERY_EXEMPTION -> "Background activity"
+        AppPermission.NOTIFICATIONS -> tr("Notifications")
+        AppPermission.BATTERY_EXEMPTION -> tr("Background activity")
     }
 
 val AppPermission.rationale: String
     get() = when (this) {
-        AppPermission.NOTIFICATIONS -> "Required to keep your session running"
-        AppPermission.BATTERY_EXEMPTION -> "Required for external session management"
+        AppPermission.NOTIFICATIONS -> tr("Required to keep your session running")
+        AppPermission.BATTERY_EXEMPTION -> tr("Required for external session management")
     }
 
 val AppPermission.manifestName: String?

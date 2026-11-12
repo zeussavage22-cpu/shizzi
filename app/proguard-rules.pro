@@ -18,3 +18,9 @@
 
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
+
+# Go datapath bindings (gomobile): the native library looks these classes up by name over JNI.
+-keep class go.** { *; }
+-keep class datapath.** { *; }
+-dontwarn go.**
+-dontwarn datapath.**

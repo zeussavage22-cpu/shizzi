@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,15 +24,15 @@ import dev.shizzi.ui.theme.ShizziTheme
 private val CheckSize = 20.dp
 
 fun usbTetheringLabel(mode: UsbTethering): String = when (mode) {
-    UsbTethering.AUTO -> "Auto"
-    UsbTethering.ALWAYS -> "Always"
-    UsbTethering.NEVER -> "Never"
+    UsbTethering.AUTO -> tr("Auto")
+    UsbTethering.ALWAYS -> tr("Always")
+    UsbTethering.NEVER -> tr("Never")
 }
 
 private fun descriptionOf(mode: UsbTethering): String = when (mode) {
-    UsbTethering.AUTO -> "Also share over USB when a cable is connected"
-    UsbTethering.ALWAYS -> "Share over USB only; requires a cable"
-    UsbTethering.NEVER -> "Share through the hotspot only"
+    UsbTethering.AUTO -> tr("Also share over USB when a cable is connected")
+    UsbTethering.ALWAYS -> tr("Share over USB only; requires a cable")
+    UsbTethering.NEVER -> tr("Share through the hotspot only")
 }
 
 @Composable
@@ -41,7 +43,7 @@ fun UsbTetheringPicker(
 ) {
     ThemedBottomSheet(onDismiss = onDismiss) {
         Text(
-            text = "USB tethering",
+            text = tr("USB tethering"),
             style = ShizziTheme.typography.heading,
             color = ShizziTheme.colors.onSurface,
         )

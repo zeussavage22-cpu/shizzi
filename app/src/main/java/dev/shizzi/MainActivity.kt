@@ -118,6 +118,8 @@ class MainActivity : ComponentActivity() {
                             onSetAutomation = viewModel::setAutomation,
                             onRegenerateAutomationToken =
                                 viewModel::regenerateAutomationToken,
+                            onSetTimeLimit = viewModel::setTimeLimit,
+                            onSetDataLimit = viewModel::setDataLimit,
                         ),
                         startScreen = startScreen,
                     )

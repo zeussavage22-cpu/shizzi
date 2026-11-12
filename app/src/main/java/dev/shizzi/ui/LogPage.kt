@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -121,7 +123,7 @@ fun LogPage(
 
     Column(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
         ScreenHeader(
-            title = "Log",
+            title = tr("Log"),
             onBack = actions.onBack,
             action = {
 
@@ -142,8 +144,8 @@ fun LogPage(
 
                         OverflowItem(
                             label = when {
-                                isAllSelected -> "DESELECT ALL"
-                                else -> "SELECT ALL"
+                                isAllSelected -> tr("DESELECT ALL")
+                                else -> tr("SELECT ALL")
                             },
                             onClick = {
                                 selected = when {
@@ -154,7 +156,7 @@ fun LogPage(
                         )
 
                         OverflowItem(
-                            label = "CLEAR",
+                            label = tr("CLEAR"),
                             onClick = { isConfirmingClear = true },
                         )
                     }
@@ -219,9 +221,9 @@ fun LogPage(
 
 
 private fun copyLabel(count: Int, total: Int): String = when {
-    count == 0 || count == total -> "COPY ALL"
-    count == 1 -> "COPY 1 LINE"
-    else -> "COPY $count LINES"
+    count == 0 || count == total -> tr("COPY ALL")
+    count == 1 -> tr("COPY 1 LINE")
+    else -> tr("COPY $count LINES", "COPIAR $count LÍNEAS")
 }
 
 private fun copyText(entries: List<LogEntry>, selected: Set<Int>): String = entries

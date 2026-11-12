@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,16 +20,16 @@ fun TetheringSection(
     var isPickerOpen by remember { mutableStateOf(false) }
 
     SettingsChoice(
-        label = SettingsText(title = "USB tethering"),
+        label = SettingsText(title = tr("USB tethering")),
         value = usbTetheringLabel(selected),
         onClick = { isPickerOpen = true },
     )
 
     SettingsAction(
-        label = SettingsText(title = "Open system settings"),
+        label = SettingsText(title = tr("Open system settings")),
         isExternal = true,
         onClick = {
-            if (!context.openTetherSettings()) toasts.show(unopenedToast("system settings"))
+            if (!context.openTetherSettings()) toasts.show(unopenedToast(tr("system settings")))
         },
     )
 

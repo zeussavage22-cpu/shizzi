@@ -5,6 +5,18 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (fork "mejorado")
+
+- **Spanish translation.** The whole interface, notification and quick settings
+  tile switch to Spanish when the phone's language is Spanish; nothing changes
+  on other languages.
+- **Live session stats** on the home screen while sharing: connected devices,
+  data downloaded and uploaded, total data, current speed and elapsed time.
+- **Session limits** (Settings → Session limits): optionally stop sharing after
+  a set time or once a set amount of data is used. Both are off by default.
+- `Compilar APK` workflow that runs the tests and publishes debug and
+  optimized APKs as a release on every push.
+
 ## [0.5.0] - 2026-10-30
 
 Adds USB tethering, so a computer on a USB cable can share the same

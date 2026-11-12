@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableStateListOf
@@ -64,10 +66,10 @@ fun rememberToastState(): ToastState = remember { ToastState() }
 
 fun unopenedToast(label: String): Toast = Toast(
     key = ToastKeys.OPEN,
-    message = "Couldn't open $label",
+    message = tr("Couldn't open $label", "No se pudo abrir $label"),
 )
 
 fun copiedToast(label: String): Toast = Toast(
     key = ToastKeys.COPY,
-    message = "$label copied",
+    message = tr("$label copied", "$label copiado"),
 )

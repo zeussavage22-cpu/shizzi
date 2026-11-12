@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -31,7 +33,7 @@ fun VpnChip(isBypassed: Boolean = false) {
         )
 
         Text(
-            text = if (isBypassed) "VPN IGNORED" else "VPN CONNECTED",
+            text = if (isBypassed) tr("VPN IGNORED") else tr("VPN CONNECTED"),
             style = ShizziTheme.typography.caption,
             color = tint,
         )

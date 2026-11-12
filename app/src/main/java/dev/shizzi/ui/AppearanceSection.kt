@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,13 +32,13 @@ fun AppearanceSection(state: AppearanceState, actions: AppearanceActions) {
     ThemePicker(selected = state.theme, onSelect = actions.onSetTheme)
 
     SettingsChoice(
-        label = SettingsText(title = "Design"),
+        label = SettingsText(title = tr("Design")),
         value = designLabel(state.design),
         onClick = { openSheet = AppearanceSheet.DESIGN },
     )
 
     SettingsChoice(
-        label = SettingsText(title = "Accent"),
+        label = SettingsText(title = tr("Accent")),
         value = accentLabel(state.accent),
         onClick = { openSheet = AppearanceSheet.ACCENT },
     )

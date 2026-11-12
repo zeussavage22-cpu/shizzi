@@ -110,6 +110,14 @@ class SessionViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { settingsStore.setUsbTethering(mode) }
     }
 
+    fun setTimeLimit(minutes: Int) {
+        viewModelScope.launch { settingsStore.setTimeLimit(minutes) }
+    }
+
+    fun setDataLimit(megabytes: Int) {
+        viewModelScope.launch { settingsStore.setDataLimit(megabytes) }
+    }
+
     fun setTheme(choice: ThemeChoice) {
         viewModelScope.launch { settingsStore.setTheme(choice) }
     }

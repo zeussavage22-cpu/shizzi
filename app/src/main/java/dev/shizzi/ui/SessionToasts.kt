@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import dev.shizzi.ShizukuState
@@ -51,7 +53,7 @@ private fun ShizukuToast(
                 key = ToastKeys.SHIZUKU,
                 message = message,
                 duration = ToastDuration.Indefinite,
-                action = ToastAction("Grant", onRequestPermission)
+                action = ToastAction(tr("Grant"), onRequestPermission)
                     .takeIf { state is ShizukuState.PermissionRequired },
             ),
         )
@@ -59,8 +61,8 @@ private fun ShizukuToast(
 }
 
 private fun describe(state: ShizukuState): String = when (state) {
-    is ShizukuState.NotInstalled -> "Shizuku is not installed"
-    is ShizukuState.NotRunning -> "Shizuku is installed but not running"
-    is ShizukuState.PermissionRequired -> "Shizzi needs permission from Shizuku"
+    is ShizukuState.NotInstalled -> tr("Shizuku is not installed")
+    is ShizukuState.NotRunning -> tr("Shizuku is installed but not running")
+    is ShizukuState.PermissionRequired -> tr("Shizzi needs permission from Shizuku")
     is ShizukuState.Ready -> ""
 }

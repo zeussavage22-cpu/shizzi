@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -50,19 +52,19 @@ private fun ColumnScope.SetupContent(token: String, toasts: ToastState) {
     var command by remember { mutableStateOf(AutomationCommand.START) }
 
     Text(
-        text = "Setup",
+        text = tr("Setup"),
         style = ShizziTheme.typography.heading,
         color = ShizziTheme.colors.onSurface,
     )
 
     Text(
-        text = "Send a broadcast intent with these values.",
+        text = tr("Send a broadcast intent with these values."),
         style = ShizziTheme.typography.body,
         color = ShizziTheme.colors.onSurfaceMuted,
     )
 
     CopyableField(
-        field = SetupField("Action", Automation.actionFor(command)),
+        field = SetupField(tr("Action"), Automation.actionFor(command)),
         toasts = toasts,
     )
 
@@ -74,11 +76,11 @@ private fun ColumnScope.SetupContent(token: String, toasts: ToastState) {
 }
 
 private fun connectionFields(token: String) = listOf(
-    SetupField("Package", "dev.shizzi"),
-    SetupField("Class", "dev.shizzi.AutomationReceiver"),
-    SetupField("Target", "Broadcast receiver"),
-    SetupField("Extra name", Automation.EXTRA_TOKEN),
-    SetupField("Extra value", token),
+    SetupField(tr("Package"), "dev.shizzi"),
+    SetupField(tr("Class"), "dev.shizzi.AutomationReceiver"),
+    SetupField(tr("Target"), tr("Broadcast receiver")),
+    SetupField(tr("Extra name"), Automation.EXTRA_TOKEN),
+    SetupField(tr("Extra value"), token),
 )
 
 @Composable
@@ -109,7 +111,7 @@ private fun CopyableField(field: SetupField, toasts: ToastState) {
 
         ShizziCompactIconButton(
             icon = Icons.Filled.ContentCopy,
-            contentDescription = "Copy ${field.label.lowercase()}",
+            contentDescription = tr("Copy ${field.label.lowercase()}", "Copiar ${field.label.lowercase()}"),
             onClick = {
                 clipboard.setText(AnnotatedString(field.value))
                 toasts.show(copiedToast(field.label))

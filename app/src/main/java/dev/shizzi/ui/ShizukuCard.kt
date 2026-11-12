@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,9 +46,9 @@ fun ShizukuCard(state: ShizukuState, onGrant: () -> Unit) {
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(ShizziTheme.spacing.sm),
         ) {
-            StatusRow(name = "Status", value = statusText(state))
-            StatusRow(name = "Service", value = serviceText(state))
-            StatusRow(name = "Version", value = ShizukuGate.installedVersion() ?: "Not installed")
+            StatusRow(name = tr("Status"), value = statusText(state))
+            StatusRow(name = tr("Service"), value = serviceText(state))
+            StatusRow(name = tr("Version"), value = ShizukuGate.installedVersion() ?: tr("Not installed"))
 
             if (state is ShizukuState.PermissionRequired) {
                 GrantButton(onGrant)
@@ -86,7 +88,7 @@ private fun GrantButton(onGrant: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = "GRANT PERMISSION",
+            text = tr("GRANT PERMISSION"),
             style = ShizziTheme.typography.label,
             color = ShizziTheme.colors.onPrimary,
         )
@@ -94,10 +96,10 @@ private fun GrantButton(onGrant: () -> Unit) {
 }
 
 private fun statusText(state: ShizukuState): String = when (state) {
-    is ShizukuState.Ready -> "Ready"
-    ShizukuState.NotInstalled -> "Not installed"
-    ShizukuState.NotRunning -> "Not running"
-    ShizukuState.PermissionRequired -> "Permission required"
+    is ShizukuState.Ready -> tr("Ready")
+    ShizukuState.NotInstalled -> tr("Not installed")
+    ShizukuState.NotRunning -> tr("Not running")
+    ShizukuState.PermissionRequired -> tr("Permission required")
 }
 
 private fun serviceText(state: ShizukuState): String = when (state) {

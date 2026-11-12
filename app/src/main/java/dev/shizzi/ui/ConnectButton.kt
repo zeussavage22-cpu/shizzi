@@ -1,5 +1,7 @@
 package dev.shizzi.ui
 
+import dev.shizzi.tr
+
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
@@ -87,7 +89,7 @@ fun CancelButton(onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = "CANCEL",
+            text = tr("CANCEL"),
             style = ShizziTheme.typography.label,
             color = ShizziTheme.colors.onSurfaceMuted,
         )
