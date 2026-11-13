@@ -62,6 +62,7 @@ data class SettingsState(
     val isRunningDiagnostics: Boolean,
     val automation: AutomationState,
     val limits: LimitsState = LimitsState(timeLimitMinutes = 0, dataLimitMb = 0),
+    val schedule: ScheduleState = ScheduleState(),
 )
 
 data class SettingsActions(
@@ -79,6 +80,7 @@ data class SettingsActions(
     val onRestartOnboarding: () -> Unit,
     val automation: AutomationActions,
     val limits: LimitsActions = LimitsActions(onSetTimeLimit = {}, onSetDataLimit = {}),
+    val schedule: ScheduleActions = ScheduleActions(),
 )
 
 @Composable
@@ -137,6 +139,10 @@ private fun settingsSections(
 
     SettingsSectionSpec(tr("Session limits")) {
         LimitsSection(state = state.limits, actions = actions.limits)
+    },
+
+    SettingsSectionSpec(tr("Schedule and alerts")) {
+        ScheduleSection(state = state.schedule, actions = actions.schedule)
     },
 
     SettingsSectionSpec(tr("Appearance")) {

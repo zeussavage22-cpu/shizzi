@@ -21,6 +21,10 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   devices). Stored only on the phone; can be cleared.
 - **Battery saver** limit: stop sharing below a chosen battery level when not charging (off by
   default).
+- **Automatic schedule**: start and stop sharing every day at chosen times.
+- **Stop when nobody is connected** after a chosen number of minutes.
+- **Device alerts**: a notification when a device joins or leaves.
+- **Home screen widget** showing status, devices and data; tap to start or stop.
 - `Compilar APK` workflow that runs the tests and publishes debug and
   optimized APKs as a release on every push.
 

@@ -40,7 +40,20 @@ data class Settings(
     val dataLimitMb: Int = 0,
     /** Stop sharing when the battery drops to this percent while not charging. 0 = off. */
     val batteryLimitPercent: Int = 0,
+    /** Stop sharing after this many minutes with no device connected. 0 = off. */
+    val idleStopMinutes: Int = 0,
+
+    /** Daily automatic start/stop. */
+    val scheduleEnabled: Boolean = false,
+    val scheduleStartMinute: Int = DEFAULT_SCHEDULE_START,
+    val scheduleStopMinute: Int = DEFAULT_SCHEDULE_STOP,
+
+    /** Notify when a device joins or leaves the hotspot. */
+    val notifyDevices: Boolean = false,
 )
+
+const val DEFAULT_SCHEDULE_START = 8 * 60
+const val DEFAULT_SCHEDULE_STOP = 22 * 60
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = "settings",
@@ -111,6 +124,22 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { it[TIME_LIMIT_MINUTES] = minutes.coerceAtLeast(0) }
     }
 
+    suspend fun setIdleStop(minutes: Int) {
+        context.dataStore.edit { it[IDLE_STOP_MINUTES] = minutes.coerceAtLeast(0) }
+    }
+
+    suspend fun setSchedule(isEnabled: Boolean, startMinute: Int, stopMinute: Int) {
+        context.dataStore.edit {
+            it[SCHEDULE_ENABLED] = isEnabled
+            it[SCHEDULE_START] = startMinute.coerceIn(0, 24 * 60 - 1)
+            it[SCHEDULE_STOP] = stopMinute.coerceIn(0, 24 * 60 - 1)
+        }
+    }
+
+    suspend fun setNotifyDevices(isEnabled: Boolean) {
+        context.dataStore.edit { it[NOTIFY_DEVICES] = isEnabled }
+    }
+
     suspend fun setBatteryLimit(percent: Int) {
         context.dataStore.edit { it[BATTERY_LIMIT_PERCENT] = percent.coerceIn(0, 100) }
     }
@@ -140,6 +169,11 @@ internal val AUTOMATION_TOKEN = stringPreferencesKey("automation_token")
 internal val TIME_LIMIT_MINUTES = intPreferencesKey("time_limit_minutes")
 internal val DATA_LIMIT_MB = intPreferencesKey("data_limit_mb")
 internal val BATTERY_LIMIT_PERCENT = intPreferencesKey("battery_limit_percent")
+internal val IDLE_STOP_MINUTES = intPreferencesKey("idle_stop_minutes")
+internal val SCHEDULE_ENABLED = booleanPreferencesKey("schedule_enabled")
+internal val SCHEDULE_START = intPreferencesKey("schedule_start_minute")
+internal val SCHEDULE_STOP = intPreferencesKey("schedule_stop_minute")
+internal val NOTIFY_DEVICES = booleanPreferencesKey("notify_devices")
 
 internal fun toSettings(preferences: Preferences) = Settings(
     theme = runCatching { ThemeChoice.valueOf(preferences[THEME].orEmpty()) }
@@ -157,4 +191,9 @@ internal fun toSettings(preferences: Preferences) = Settings(
     timeLimitMinutes = (preferences[TIME_LIMIT_MINUTES] ?: 0).coerceAtLeast(0),
     dataLimitMb = (preferences[DATA_LIMIT_MB] ?: 0).coerceAtLeast(0),
     batteryLimitPercent = (preferences[BATTERY_LIMIT_PERCENT] ?: 0).coerceIn(0, 100),
+    idleStopMinutes = (preferences[IDLE_STOP_MINUTES] ?: 0).coerceAtLeast(0),
+    scheduleEnabled = preferences[SCHEDULE_ENABLED] ?: false,
+    scheduleStartMinute = (preferences[SCHEDULE_START] ?: DEFAULT_SCHEDULE_START).coerceIn(0, 24 * 60 - 1),
+    scheduleStopMinute = (preferences[SCHEDULE_STOP] ?: DEFAULT_SCHEDULE_STOP).coerceIn(0, 24 * 60 - 1),
+    notifyDevices = preferences[NOTIFY_DEVICES] ?: false,
 )

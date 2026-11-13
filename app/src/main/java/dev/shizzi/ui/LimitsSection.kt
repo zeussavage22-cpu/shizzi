@@ -29,15 +29,22 @@ data class LimitsState(
     val timeLimitMinutes: Int,
     val dataLimitMb: Int,
     val batteryLimitPercent: Int = 0,
+    val idleStopMinutes: Int = 0,
 )
 
 data class LimitsActions(
     val onSetTimeLimit: (Int) -> Unit,
     val onSetDataLimit: (Int) -> Unit,
     val onSetBatteryLimit: (Int) -> Unit = {},
+    val onSetIdleStop: (Int) -> Unit = {},
 )
 
-private enum class OpenPicker { NONE, TIME, DATA, BATTERY }
+private enum class OpenPicker { NONE, TIME, DATA, BATTERY, IDLE }
+
+private fun idleLabel(minutes: Int): String = when {
+    minutes <= 0 -> tr("Off")
+    else -> "$minutes min"
+}
 
 /** Optional automatic stop after a time or data amount. Both are off unless the user picks one. */
 @Composable
@@ -71,8 +78,26 @@ fun LimitsSection(state: LimitsState, actions: LimitsActions) {
         onClick = { open = OpenPicker.BATTERY },
     )
 
+    SettingsChoice(
+        label = SettingsText(
+            title = tr("Stop when nobody is connected"),
+            subtitle = tr("Stop sharing after this long with no devices connected"),
+        ),
+        value = idleLabel(state.idleStopMinutes),
+        onClick = { open = OpenPicker.IDLE },
+    )
+
     when (open) {
         OpenPicker.NONE -> Unit
+
+        OpenPicker.IDLE -> OptionPicker(
+            title = tr("Stop when nobody is connected"),
+            options = SessionLimits.IDLE_OPTIONS_MINUTES,
+            selected = state.idleStopMinutes,
+            labelOf = ::idleLabel,
+            onSelect = actions.onSetIdleStop,
+            onDismiss = { open = OpenPicker.NONE },
+        )
 
         OpenPicker.BATTERY -> OptionPicker(
             title = tr("Battery saver"),

@@ -26,6 +26,37 @@ class SessionNotification(private val context: Context) {
             .build()
     }
 
+    /** A notice that a device joined or left the hotspot. */
+    fun buildDeviceChange(joined: Boolean, count: Int): Notification {
+        createAlertChannel()
+
+        val title = if (joined) tr("A device connected") else tr("A device disconnected")
+        val body = when (count) {
+            0 -> tr("No devices connected")
+            1 -> tr("1 device connected", "1 dispositivo conectado")
+            else -> tr("$count devices connected", "$count dispositivos conectados")
+        }
+
+        return Notification.Builder(context, ALERT_CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentIntent(openAppIntent())
+            .setAutoCancel(true)
+            .setTimeoutAfter(ALERT_TIMEOUT_MS)
+            .build()
+    }
+
+    private fun createAlertChannel() {
+        val channel = NotificationChannel(
+            ALERT_CHANNEL_ID,
+            tr("Device alerts", "Avisos de dispositivos"),
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ).apply { description = tr("When a device joins or leaves", "Cuando un dispositivo se conecta o desconecta") }
+
+        notificationManager().createNotificationChannel(channel)
+    }
+
     /** A one-off notice that a session limit ended sharing. */
     fun buildLimitReached(reason: LimitReason): Notification {
         createChannel()
@@ -134,6 +165,8 @@ class SessionNotification(private val context: Context) {
 
     private companion object {
         const val CHANNEL_ID = "tethering-session"
+        const val ALERT_CHANNEL_ID = "device-alerts"
+        const val ALERT_TIMEOUT_MS = 60_000L
 
         const val EXCEPTION_MARKER = "Exception"
 

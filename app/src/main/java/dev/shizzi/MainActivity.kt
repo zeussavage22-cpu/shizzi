@@ -122,6 +122,9 @@ class MainActivity : ComponentActivity() {
                             onSetDataLimit = viewModel::setDataLimit,
                             onSetBatteryLimit = viewModel::setBatteryLimit,
                             onClearHistory = viewModel::clearHistory,
+                            onSetIdleStop = viewModel::setIdleStop,
+                            onSetSchedule = viewModel::setSchedule,
+                            onSetNotifyDevices = viewModel::setNotifyDevices,
                         ),
                         startScreen = startScreen,
                     )

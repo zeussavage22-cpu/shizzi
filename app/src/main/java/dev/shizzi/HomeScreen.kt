@@ -13,6 +13,8 @@ import dev.shizzi.ui.HomeActions
 import dev.shizzi.ui.HistoryPage
 import dev.shizzi.ui.HomeLimits
 import dev.shizzi.ui.HomePage
+import dev.shizzi.ui.ScheduleActions
+import dev.shizzi.ui.ScheduleState
 import dev.shizzi.ui.LimitsActions
 import dev.shizzi.ui.LimitsState
 import dev.shizzi.ui.LogActions
@@ -58,6 +60,9 @@ data class AppActions(
     val onSetDataLimit: (Int) -> Unit = {},
     val onSetBatteryLimit: (Int) -> Unit = {},
     val onClearHistory: () -> Unit = {},
+    val onSetIdleStop: (Int) -> Unit = {},
+    val onSetSchedule: (Boolean, Int, Int) -> Unit = { _, _, _ -> },
+    val onSetNotifyDevices: (Boolean) -> Unit = {},
 )
 
 
@@ -181,6 +186,13 @@ private fun settingsState(state: AppState): SettingsState {
             timeLimitMinutes = settings.timeLimitMinutes,
             dataLimitMb = settings.dataLimitMb,
             batteryLimitPercent = settings.batteryLimitPercent,
+            idleStopMinutes = settings.idleStopMinutes,
+        ),
+        schedule = ScheduleState(
+            isEnabled = settings.scheduleEnabled,
+            startMinute = settings.scheduleStartMinute,
+            stopMinute = settings.scheduleStopMinute,
+            notifyDevices = settings.notifyDevices,
         ),
     )
 }
@@ -209,6 +221,11 @@ private fun settingsActions(context: ScreenContext): SettingsActions {
             onSetTimeLimit = actions.onSetTimeLimit,
             onSetDataLimit = actions.onSetDataLimit,
             onSetBatteryLimit = actions.onSetBatteryLimit,
+            onSetIdleStop = actions.onSetIdleStop,
+        ),
+        schedule = ScheduleActions(
+            onSetSchedule = actions.onSetSchedule,
+            onSetNotifyDevices = actions.onSetNotifyDevices,
         ),
     )
 }

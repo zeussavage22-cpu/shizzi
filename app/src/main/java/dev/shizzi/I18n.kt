@@ -96,6 +96,23 @@ object I18n {
             "Deja de compartir cuando la batería baje y el teléfono no esté cargando",
         "Battery is low" to "Batería baja",
 
+        // Schedule / idle / alerts / widget (new)
+        "Schedule and alerts" to "Horario y avisos",
+        "Automatic schedule" to "Horario automático",
+        "Start and stop sharing every day at the times below" to
+            "Empieza y deja de compartir todos los días a estas horas",
+        "Turn on at" to "Encender a las",
+        "Turn off at" to "Apagar a las",
+        "Device alerts" to "Avisos de dispositivos",
+        "Get a notification when a device connects or disconnects" to
+            "Recibe una notificación cuando un dispositivo se conecta o desconecta",
+        "A device connected" to "Se conectó un dispositivo",
+        "A device disconnected" to "Se desconectó un dispositivo",
+        "Stop when nobody is connected" to "Apagar si no hay nadie conectado",
+        "Stop sharing after this long with no devices connected" to
+            "Deja de compartir tras este tiempo sin dispositivos conectados",
+        "No devices connected for a while" to "Sin dispositivos conectados desde hace un rato",
+
         // Session limits (new)
         "Stop after" to "Detener después de",
         "Data limit" to "Límite de datos",

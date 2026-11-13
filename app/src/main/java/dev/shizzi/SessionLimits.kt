@@ -1,7 +1,7 @@
 package dev.shizzi
 
 /** Why a session was stopped automatically. */
-enum class LimitReason { TIME, DATA, BATTERY }
+enum class LimitReason { TIME, DATA, BATTERY, IDLE }
 
 /**
  * Optional, user-chosen limits that end a sharing session on their own.
@@ -18,6 +18,20 @@ object SessionLimits {
 
     /** Choices offered for the battery saver, in percent. 0 means off. */
     val BATTERY_OPTIONS_PERCENT = listOf(0, 10, 15, 20, 30, 40, 50)
+
+    /** Choices offered for stopping with no devices connected, in minutes. 0 means off. */
+    val IDLE_OPTIONS_MINUTES = listOf(0, 3, 5, 10, 15, 30, 60)
+
+    /**
+     * True once a connected session has had no device for [idleMinutes] minutes.
+     * [lastActiveAt] is the last time a device was seen (or the session started).
+     */
+    fun idleReached(idleMinutes: Int, state: SessionUiState, lastActiveAt: Long, now: Long): Boolean =
+        idleMinutes > 0 &&
+            state.status == UiStatus.CONNECTED &&
+            state.clientCount == 0 &&
+            lastActiveAt > 0 &&
+            now - lastActiveAt >= idleMinutes * MS_PER_MINUTE
 
     private const val BYTES_PER_MB = 1_000_000L
     private const val MS_PER_MINUTE = 60_000L
@@ -78,6 +92,7 @@ object SessionLimits {
         LimitReason.TIME -> tr("Time limit reached")
         LimitReason.DATA -> tr("Data limit reached")
         LimitReason.BATTERY -> tr("Battery is low")
+        LimitReason.IDLE -> tr("No devices connected for a while")
     }
 
     /**

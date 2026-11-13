@@ -118,6 +118,18 @@ class SessionViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { settingsStore.setBatteryLimit(percent) }
     }
 
+    fun setIdleStop(minutes: Int) {
+        viewModelScope.launch { settingsStore.setIdleStop(minutes) }
+    }
+
+    fun setSchedule(isEnabled: Boolean, startMinute: Int, stopMinute: Int) {
+        viewModelScope.launch { settingsStore.setSchedule(isEnabled, startMinute, stopMinute) }
+    }
+
+    fun setNotifyDevices(isEnabled: Boolean) {
+        viewModelScope.launch { settingsStore.setNotifyDevices(isEnabled) }
+    }
+
     fun clearHistory() {
         UsageHistory.clear(getApplication())
     }

@@ -52,6 +52,18 @@ class SessionService : Service() {
     @Volatile
     private var batteryLimitPercent = 0
 
+    @Volatile
+    private var idleStopMinutes = 0
+
+    @Volatile
+    private var notifyDevices = false
+
+    /** Last time a device was connected (or the session started), for the idle stop. */
+    private var lastActiveAt = 0L
+
+    /** Device count at the previous update, or -1 before the first one of a session. */
+    private var lastClientCount = -1
+
     private val usage by lazy { UsageRecorder(applicationContext) }
 
     /** Set once a limit has asked the session to stop, so it asks only once. */
@@ -72,6 +84,8 @@ class SessionService : Service() {
                 timeLimitMinutes = settings.timeLimitMinutes
                 dataLimitMb = settings.dataLimitMb
                 batteryLimitPercent = settings.batteryLimitPercent
+                idleStopMinutes = settings.idleStopMinutes
+                notifyDevices = settings.notifyDevices
             }
         }
     }
@@ -80,8 +94,17 @@ class SessionService : Service() {
     private fun enforceLimits() {
         if (isLimitStopRequested || isStopping) return
 
+        val now = System.currentTimeMillis()
+        val state = internalState.value
+        if (state.status == UiStatus.CONNECTED) {
+            if (lastActiveAt == 0L || state.clientCount > 0) lastActiveAt = now
+        } else {
+            lastActiveAt = 0L
+        }
+
         val battery = readBattery()
-        val reason = SessionLimits.reached(
+        val reason = (if (SessionLimits.idleReached(idleStopMinutes, state, lastActiveAt, now)) LimitReason.IDLE else null)
+            ?: SessionLimits.reached(
             timeLimitMinutes = timeLimitMinutes,
             dataLimitMb = dataLimitMb,
             state = internalState.value,
@@ -113,6 +136,26 @@ class SessionService : Service() {
     /** Records usage history; never lets a history problem disturb the session. */
     private fun recordUsage() {
         runCatching { usage.observe(internalState.value) }
+        runCatching { announceDeviceChanges() }
+    }
+
+    /** Optional notice when a device joins or leaves. */
+    private fun announceDeviceChanges() {
+        val state = internalState.value
+        if (state.status != UiStatus.CONNECTED) {
+            lastClientCount = -1
+            return
+        }
+
+        val previous = lastClientCount
+        val current = state.clientCount
+        lastClientCount = current
+        if (!notifyDevices || previous < 0 || previous == current) return
+
+        notificationManager().notify(
+            DEVICE_NOTIFICATION_ID,
+            notification.buildDeviceChange(joined = current > previous, count = current),
+        )
     }
 
     private fun finishUsage() {
@@ -147,6 +190,8 @@ class SessionService : Service() {
         }
         val attempt = ++generation
         isLimitStopRequested = false
+        lastActiveAt = 0L
+        lastClientCount = -1
         internalState.update {
             it.copy(isBusy = true, status = UiStatus.LOADING, lastError = "", detail = "")
         }
@@ -282,6 +327,7 @@ class SessionService : Service() {
             NOTIFICATION_ID,
             notification.build(internalState.value, isStopping),
         )
+        runCatching { ShizziWidget.refresh(this, internalState.value) }
     }
 
     private fun notificationManager(): NotificationManager =
@@ -299,6 +345,7 @@ class SessionService : Service() {
     companion object {
         private const val NOTIFICATION_ID = 1
         private const val LIMIT_NOTIFICATION_ID = 2
+        private const val DEVICE_NOTIFICATION_ID = 3
         const val ACTION_STOP = "dev.shizzi.STOP_SESSION"
         const val EXTRA_REPORT_AS = "reportAs"
 

@@ -13,6 +13,9 @@
 
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <uses-permission
         android:name="android.permission.MANAGE_TEST_NETWORKS"
         tools:ignore="ProtectedPermissions" />
@@ -74,6 +77,38 @@
                 <action android:name="dev.shizzi.action.TOGGLE" />
                 <action android:name="dev.shizzi.action.QUERY_STATUS" />
             </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".ScheduleReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="dev.shizzi.action.SCHEDULE_START" />
+                <action android:name="dev.shizzi.action.SCHEDULE_STOP" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".ShizziWidget"
+            android:exported="false"
+            android:label="Shizzi">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
         </receiver>
 
         <provider
