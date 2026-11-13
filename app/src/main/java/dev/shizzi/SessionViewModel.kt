@@ -114,6 +114,14 @@ class SessionViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { settingsStore.setTimeLimit(minutes) }
     }
 
+    fun setBatteryLimit(percent: Int) {
+        viewModelScope.launch { settingsStore.setBatteryLimit(percent) }
+    }
+
+    fun clearHistory() {
+        UsageHistory.clear(getApplication())
+    }
+
     fun setDataLimit(megabytes: Int) {
         viewModelScope.launch { settingsStore.setDataLimit(megabytes) }
     }

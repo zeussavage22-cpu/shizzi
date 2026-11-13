@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.BatteryManager
 import android.os.Build
 import android.os.IBinder
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,11 @@ class SessionService : Service() {
     @Volatile
     private var dataLimitMb = 0
 
+    @Volatile
+    private var batteryLimitPercent = 0
+
+    private val usage by lazy { UsageRecorder(applicationContext) }
+
     /** Set once a limit has asked the session to stop, so it asks only once. */
     @Volatile
     private var isLimitStopRequested = false
@@ -65,6 +71,7 @@ class SessionService : Service() {
             settingsStore().settings.collect { settings ->
                 timeLimitMinutes = settings.timeLimitMinutes
                 dataLimitMb = settings.dataLimitMb
+                batteryLimitPercent = settings.batteryLimitPercent
             }
         }
     }
@@ -73,11 +80,15 @@ class SessionService : Service() {
     private fun enforceLimits() {
         if (isLimitStopRequested || isStopping) return
 
+        val battery = readBattery()
         val reason = SessionLimits.reached(
             timeLimitMinutes = timeLimitMinutes,
             dataLimitMb = dataLimitMb,
             state = internalState.value,
             now = System.currentTimeMillis(),
+            batteryLimitPercent = batteryLimitPercent,
+            batteryPercent = battery.first,
+            isCharging = battery.second,
         ) ?: return
 
         isLimitStopRequested = true
@@ -88,6 +99,24 @@ class SessionService : Service() {
         )
         runCatching { stop(this) }
             .onFailure { SessionLog.error("could not stop at limit: ${it.message}") }
+    }
+
+    /** Battery percent (or -1 if unknown) and whether the phone is charging. */
+    private fun readBattery(): Pair<Int, Boolean> {
+        if (batteryLimitPercent <= 0) return -1 to false
+        return runCatching {
+            val manager = getSystemService(BatteryManager::class.java)
+            manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) to manager.isCharging
+        }.getOrDefault(-1 to false)
+    }
+
+    /** Records usage history; never lets a history problem disturb the session. */
+    private fun recordUsage() {
+        runCatching { usage.observe(internalState.value) }
+    }
+
+    private fun finishUsage() {
+        runCatching { usage.finish() }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -145,6 +174,7 @@ class SessionService : Service() {
                 current.applyOutcome(outcome).stampConnectedSince(System.currentTimeMillis())
             }
             publishState()
+            recordUsage()
             announceOutcome()
             followStatus()
         }
@@ -157,6 +187,7 @@ class SessionService : Service() {
                 current.applyOutcome(outcome).stampConnectedSince(System.currentTimeMillis())
             }
             publishState()
+            recordUsage()
             if (internalState.value.status == UiStatus.READY) finishEndedSession()
             enforceLimits()
         },
@@ -165,6 +196,7 @@ class SessionService : Service() {
     /** The session stopped on its own, as a stop would; release it the same way. */
     private fun finishEndedSession() {
         val ended = generation
+        finishUsage()
 
         scope.launch {
             sessionLock.withLock { controller.unbindAndStopDaemon() }
@@ -182,6 +214,7 @@ class SessionService : Service() {
         startJob = null
 
         statusPoller.stop()
+        finishUsage()
 
         internalState.update {
             it.asStopped()
@@ -208,6 +241,7 @@ class SessionService : Service() {
 
     private fun handleSessionLost() {
         statusPoller.stop()
+        finishUsage()
 
         isStopping = false
         SessionLog.error("shell process died; recovering any downstream it left up")
@@ -254,6 +288,7 @@ class SessionService : Service() {
         getSystemService(NotificationManager::class.java)
 
     override fun onDestroy() {
+        finishUsage()
         controller.onSessionLost = null
         controller.unbind()
         scope.cancel()

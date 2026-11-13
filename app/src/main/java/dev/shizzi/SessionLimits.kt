@@ -1,7 +1,7 @@
 package dev.shizzi
 
 /** Why a session was stopped automatically. */
-enum class LimitReason { TIME, DATA }
+enum class LimitReason { TIME, DATA, BATTERY }
 
 /**
  * Optional, user-chosen limits that end a sharing session on their own.
@@ -15,6 +15,9 @@ object SessionLimits {
 
     /** Choices offered for the data limit, in megabytes (1 MB = 1,000,000 bytes). 0 means off. */
     val DATA_OPTIONS_MB = listOf(0, 250, 500, 1_000, 2_000, 5_000, 10_000, 20_000)
+
+    /** Choices offered for the battery saver, in percent. 0 means off. */
+    val BATTERY_OPTIONS_PERCENT = listOf(0, 10, 15, 20, 30, 40, 50)
 
     private const val BYTES_PER_MB = 1_000_000L
     private const val MS_PER_MINUTE = 60_000L
@@ -30,8 +33,18 @@ object SessionLimits {
         dataLimitMb: Int,
         state: SessionUiState,
         now: Long,
+        batteryLimitPercent: Int = 0,
+        batteryPercent: Int = -1,
+        isCharging: Boolean = false,
     ): LimitReason? {
         if (state.status != UiStatus.CONNECTED) return null
+
+        val hasBatteryReading = batteryPercent in 0..100
+        if (batteryLimitPercent > 0 && hasBatteryReading && !isCharging &&
+            batteryPercent <= batteryLimitPercent
+        ) {
+            return LimitReason.BATTERY
+        }
 
         val hasTimeLimit = timeLimitMinutes > 0 && state.connectedSince > 0
         if (hasTimeLimit && now - state.connectedSince >= timeLimitMinutes * MS_PER_MINUTE) {
@@ -56,9 +69,31 @@ object SessionLimits {
         else -> Traffic.format(megabytes * BYTES_PER_MB)
     }
 
+    fun batteryLabel(percent: Int): String = when {
+        percent <= 0 -> tr("Off")
+        else -> tr("Below $percent%", "Por debajo del $percent%")
+    }
+
     fun describe(reason: LimitReason): String = when (reason) {
         LimitReason.TIME -> tr("Time limit reached")
         LimitReason.DATA -> tr("Data limit reached")
+        LimitReason.BATTERY -> tr("Battery is low")
+    }
+
+    /**
+     * How far the session is toward its nearest time or data limit, from 0 to 1,
+     * or null when neither limit is on.
+     */
+    fun progress(timeLimitMinutes: Int, dataLimitMb: Int, state: SessionUiState, now: Long): Float? {
+        val parts = buildList {
+            if (timeLimitMinutes > 0 && state.connectedSince > 0) {
+                add((now - state.connectedSince).toFloat() / (timeLimitMinutes * MS_PER_MINUTE))
+            }
+            if (dataLimitMb > 0) {
+                add((state.traffic.up + state.traffic.down).toFloat() / (dataLimitMb * BYTES_PER_MB))
+            }
+        }
+        return parts.maxOrNull()?.coerceIn(0f, 1f)
     }
 
     /** Formats an elapsed duration as H:MM:SS (or M:SS under an hour). */

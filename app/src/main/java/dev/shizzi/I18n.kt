@@ -75,6 +75,27 @@ object I18n {
         "Copy token" to "Copiar token",
         "Regenerate token" to "Generar nuevo token",
 
+        // Home redesign / history / battery (new)
+        "Sharing" to "Compartiendo",
+        "Ready to share" to "Listo para compartir",
+        "Usage history" to "Historial de uso",
+        "Data shared" to "Datos compartidos",
+        "Today" to "Hoy",
+        "7 days" to "7 días",
+        "This month" to "Este mes",
+        "View history" to "Ver historial",
+        "Speed · last minute" to "Velocidad · último minuto",
+        "Last 14 days" to "Últimos 14 días",
+        "Recent sessions" to "Sesiones recientes",
+        "No sessions yet. Start sharing and they will show up here." to
+            "Aún no hay sesiones. Empieza a compartir y aparecerán aquí.",
+        "Clear history" to "Borrar historial",
+        "Tap again to clear" to "Toca otra vez para borrar",
+        "Battery saver" to "Ahorro de batería",
+        "Stop sharing when the battery runs low and the phone is not charging" to
+            "Deja de compartir cuando la batería baje y el teléfono no esté cargando",
+        "Battery is low" to "Batería baja",
+
         // Session limits (new)
         "Stop after" to "Detener después de",
         "Data limit" to "Límite de datos",

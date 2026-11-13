@@ -38,6 +38,8 @@ data class Settings(
     val timeLimitMinutes: Int = 0,
     /** Stop sharing once this many megabytes have been used. 0 = off (the default). */
     val dataLimitMb: Int = 0,
+    /** Stop sharing when the battery drops to this percent while not charging. 0 = off. */
+    val batteryLimitPercent: Int = 0,
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
@@ -109,6 +111,10 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { it[TIME_LIMIT_MINUTES] = minutes.coerceAtLeast(0) }
     }
 
+    suspend fun setBatteryLimit(percent: Int) {
+        context.dataStore.edit { it[BATTERY_LIMIT_PERCENT] = percent.coerceIn(0, 100) }
+    }
+
     suspend fun setDataLimit(megabytes: Int) {
         context.dataStore.edit { it[DATA_LIMIT_MB] = megabytes.coerceAtLeast(0) }
     }
@@ -133,6 +139,7 @@ internal val AUTOMATION = booleanPreferencesKey("automation")
 internal val AUTOMATION_TOKEN = stringPreferencesKey("automation_token")
 internal val TIME_LIMIT_MINUTES = intPreferencesKey("time_limit_minutes")
 internal val DATA_LIMIT_MB = intPreferencesKey("data_limit_mb")
+internal val BATTERY_LIMIT_PERCENT = intPreferencesKey("battery_limit_percent")
 
 internal fun toSettings(preferences: Preferences) = Settings(
     theme = runCatching { ThemeChoice.valueOf(preferences[THEME].orEmpty()) }
@@ -149,4 +156,5 @@ internal fun toSettings(preferences: Preferences) = Settings(
     automationToken = preferences[AUTOMATION_TOKEN].orEmpty(),
     timeLimitMinutes = (preferences[TIME_LIMIT_MINUTES] ?: 0).coerceAtLeast(0),
     dataLimitMb = (preferences[DATA_LIMIT_MB] ?: 0).coerceAtLeast(0),
+    batteryLimitPercent = (preferences[BATTERY_LIMIT_PERCENT] ?: 0).coerceIn(0, 100),
 )

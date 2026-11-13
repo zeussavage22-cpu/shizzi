@@ -25,14 +25,19 @@ import dev.shizzi.ui.theme.ShizziTheme
 
 private val CheckSize = 20.dp
 
-data class LimitsState(val timeLimitMinutes: Int, val dataLimitMb: Int)
+data class LimitsState(
+    val timeLimitMinutes: Int,
+    val dataLimitMb: Int,
+    val batteryLimitPercent: Int = 0,
+)
 
 data class LimitsActions(
     val onSetTimeLimit: (Int) -> Unit,
     val onSetDataLimit: (Int) -> Unit,
+    val onSetBatteryLimit: (Int) -> Unit = {},
 )
 
-private enum class OpenPicker { NONE, TIME, DATA }
+private enum class OpenPicker { NONE, TIME, DATA, BATTERY }
 
 /** Optional automatic stop after a time or data amount. Both are off unless the user picks one. */
 @Composable
@@ -57,8 +62,26 @@ fun LimitsSection(state: LimitsState, actions: LimitsActions) {
         onClick = { open = OpenPicker.DATA },
     )
 
+    SettingsChoice(
+        label = SettingsText(
+            title = tr("Battery saver"),
+            subtitle = tr("Stop sharing when the battery runs low and the phone is not charging"),
+        ),
+        value = SessionLimits.batteryLabel(state.batteryLimitPercent),
+        onClick = { open = OpenPicker.BATTERY },
+    )
+
     when (open) {
         OpenPicker.NONE -> Unit
+
+        OpenPicker.BATTERY -> OptionPicker(
+            title = tr("Battery saver"),
+            options = SessionLimits.BATTERY_OPTIONS_PERCENT,
+            selected = state.batteryLimitPercent,
+            labelOf = SessionLimits::batteryLabel,
+            onSelect = actions.onSetBatteryLimit,
+            onDismiss = { open = OpenPicker.NONE },
+        )
 
         OpenPicker.TIME -> OptionPicker(
             title = tr("Stop after"),

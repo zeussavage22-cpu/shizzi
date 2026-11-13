@@ -10,6 +10,8 @@ import dev.shizzi.ui.DiagnosticsToast
 import dev.shizzi.ui.EasterEggPage
 import dev.shizzi.ui.HandleBack
 import dev.shizzi.ui.HomeActions
+import dev.shizzi.ui.HistoryPage
+import dev.shizzi.ui.HomeLimits
 import dev.shizzi.ui.HomePage
 import dev.shizzi.ui.LimitsActions
 import dev.shizzi.ui.LimitsState
@@ -54,6 +56,8 @@ data class AppActions(
     val onRegenerateAutomationToken: () -> Unit,
     val onSetTimeLimit: (Int) -> Unit = {},
     val onSetDataLimit: (Int) -> Unit = {},
+    val onSetBatteryLimit: (Int) -> Unit = {},
+    val onClearHistory: () -> Unit = {},
 )
 
 
@@ -118,6 +122,10 @@ private fun ScreenBody(screen: Screen, context: ScreenContext) {
         Screen.SETTINGS -> SettingsRoute(context)
         Screen.LOG -> LogRoute(context)
         Screen.EASTER_EGG -> EasterEggPage(onDismiss = context.navigation.goHome)
+        Screen.HISTORY -> HistoryPage(
+            onClear = context.actions.onClearHistory,
+            onBack = context.navigation.goHome,
+        )
     }
 }
 
@@ -132,6 +140,11 @@ private fun HomeRoute(context: ScreenContext) {
             onCancel = actions.onCancel,
             onOpenSettings = { context.navigation.open(Screen.SETTINGS) },
             onOpenEasterEgg = { context.navigation.open(Screen.EASTER_EGG) },
+            onOpenHistory = { context.navigation.open(Screen.HISTORY) },
+        ),
+        limits = HomeLimits(
+            timeLimitMinutes = context.state.settings.timeLimitMinutes,
+            dataLimitMb = context.state.settings.dataLimitMb,
         ),
     )
 }
@@ -167,6 +180,7 @@ private fun settingsState(state: AppState): SettingsState {
         limits = LimitsState(
             timeLimitMinutes = settings.timeLimitMinutes,
             dataLimitMb = settings.dataLimitMb,
+            batteryLimitPercent = settings.batteryLimitPercent,
         ),
     )
 }
@@ -194,6 +208,7 @@ private fun settingsActions(context: ScreenContext): SettingsActions {
         limits = LimitsActions(
             onSetTimeLimit = actions.onSetTimeLimit,
             onSetDataLimit = actions.onSetDataLimit,
+            onSetBatteryLimit = actions.onSetBatteryLimit,
         ),
     )
 }

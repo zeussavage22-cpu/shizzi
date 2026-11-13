@@ -14,6 +14,13 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   data downloaded and uploaded, total data, current speed and elapsed time.
 - **Session limits** (Settings → Session limits): optionally stop sharing after
   a set time or once a set amount of data is used. Both are off by default.
+- **New home screen**: an animated connection ring (sweeping while starting, pulsing while
+  sharing, live speed in the middle, outer arc for limit usage), stat cards with icons and a
+  one-minute speed chart. While idle it shows today / 7-day / month totals.
+- **Usage history** screen: totals, a 14-day bar chart and the recent sessions (duration, data,
+  devices). Stored only on the phone; can be cleared.
+- **Battery saver** limit: stop sharing below a chosen battery level when not charging (off by
+  default).
 - `Compilar APK` workflow that runs the tests and publishes debug and
   optimized APKs as a release on every push.
 

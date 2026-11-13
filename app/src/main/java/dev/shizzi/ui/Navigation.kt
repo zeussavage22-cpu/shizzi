@@ -24,6 +24,7 @@ enum class Screen(val depth: Int) {
     SETTINGS(1),
     LOG(2),
     EASTER_EGG(1),
+    HISTORY(1),
 }
 
 private const val SlideFraction = 6

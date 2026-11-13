@@ -120,6 +120,8 @@ class MainActivity : ComponentActivity() {
                                 viewModel::regenerateAutomationToken,
                             onSetTimeLimit = viewModel::setTimeLimit,
                             onSetDataLimit = viewModel::setDataLimit,
+                            onSetBatteryLimit = viewModel::setBatteryLimit,
+                            onClearHistory = viewModel::clearHistory,
                         ),
                         startScreen = startScreen,
                     )
