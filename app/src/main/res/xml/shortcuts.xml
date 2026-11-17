@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_start"
+        android:shortcutId="start"
+        android:shortcutLongLabel="@string/shortcut_start_long"
+        android:shortcutShortLabel="@string/shortcut_start">
+        <intent
+            android:action="dev.shizzi.shortcut.START"
+            android:targetClass="dev.shizzi.ShortcutActivity"
+            android:targetPackage="dev.condor.hotspot" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_stop"
+        android:shortcutId="stop"
+        android:shortcutLongLabel="@string/shortcut_stop_long"
+        android:shortcutShortLabel="@string/shortcut_stop">
+        <intent
+            android:action="dev.shizzi.shortcut.STOP"
+            android:targetClass="dev.shizzi.ShortcutActivity"
+            android:targetPackage="dev.condor.hotspot" />
+    </shortcut>
+</shortcuts>

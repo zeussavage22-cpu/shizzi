@@ -36,7 +36,7 @@ fun AutomationSection(
     SettingsToggle(
         label = SettingsText(
             title = tr("Automation"),
-            subtitle = tr("Allows tasker apps to manage Shizzi"),
+            subtitle = tr("Allows tasker apps to manage Shizzi").replace("Shizzi", dev.shizzi.AppInfo.NAME),
         ),
         isChecked = state.isEnabled,
         onCheckedChange = actions.onSetEnabled,

@@ -63,6 +63,6 @@ private fun ShizukuToast(
 private fun describe(state: ShizukuState): String = when (state) {
     is ShizukuState.NotInstalled -> tr("Shizuku is not installed")
     is ShizukuState.NotRunning -> tr("Shizuku is installed but not running")
-    is ShizukuState.PermissionRequired -> tr("Shizzi needs permission from Shizuku")
+    is ShizukuState.PermissionRequired -> tr("Shizzi needs permission from Shizuku").replace("Shizzi", dev.shizzi.AppInfo.NAME)
     is ShizukuState.Ready -> ""
 }

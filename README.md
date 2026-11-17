@@ -1,3 +1,12 @@
+# Cóndor
+
+Hotspot sin root con Shizuku. Basado en [Shizzi](https://github.com/carlelieser/shizzi) de
+carlelieser (todo el mérito del motor es suyo), con interfaz nueva, motor TCP afinado y funciones
+extra: prueba de velocidad, código QR del hotspot, historial, límites, horario, avisos, widget y
+accesos directos. Uso personal: el proyecto original no tiene licencia, así que no se publica.
+
+---
+
 <p align="center">
   <img src="docs/assets/icon.png" width="96" alt="">
 </p>

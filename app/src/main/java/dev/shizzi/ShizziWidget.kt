@@ -50,7 +50,7 @@ class ShizziWidget : AppWidgetProvider() {
             UiStatus.CONNECTED -> if (state.isWaitingForUsb) tr("Waiting for USB") else tr("Sharing")
             UiStatus.LOADING -> tr("Starting…")
             UiStatus.ERROR -> tr("Session ended")
-            UiStatus.READY -> "Shizzi"
+            UiStatus.READY -> AppInfo.NAME
         }
 
         private fun subtitle(state: SessionUiState): String = when (state.status) {

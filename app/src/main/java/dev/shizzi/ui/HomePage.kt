@@ -20,15 +20,16 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +65,19 @@ fun HomePage(
     state: SessionUiState,
     actions: HomeActions,
     limits: HomeLimits = HomeLimits(),
+    hotspot: Pair<String, String> = "" to "",
 ) {
+    var isSharingQr by remember { mutableStateOf(false) }
+
+    if (isSharingQr) {
+        QrShareSheet(
+            ssid = hotspot.first,
+            password = hotspot.second,
+            onSave = actions.onSaveHotspotCredentials,
+            onDismiss = { isSharingQr = false },
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -74,8 +87,7 @@ fun HomePage(
 
         HomeHeader(
             state = state,
-            onOpenHistory = actions.onOpenHistory,
-            onOpenSettings = actions.onOpenSettings,
+            onShareQr = { isSharingQr = true },
         )
 
         Column(
@@ -103,13 +115,13 @@ data class HomeActions(
     val onOpenSettings: () -> Unit,
     val onOpenEasterEgg: () -> Unit,
     val onOpenHistory: () -> Unit = {},
+    val onSaveHotspotCredentials: (String, String) -> Unit = { _, _ -> },
 )
 
 @Composable
 private fun HomeHeader(
     state: SessionUiState,
-    onOpenHistory: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onShareQr: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -118,6 +130,13 @@ private fun HomeHeader(
             .padding(horizontal = ShizziTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Text(
+            text = dev.shizzi.AppInfo.NAME,
+            style = ShizziTheme.typography.heading,
+            color = ShizziTheme.colors.onSurface,
+            modifier = Modifier.padding(start = ShizziTheme.spacing.sm),
+        )
+
         Box(modifier = Modifier.padding(start = ShizziTheme.spacing.sm)) {
             ShizukuBadge(state.shizukuState)
         }
@@ -125,17 +144,10 @@ private fun HomeHeader(
         Spacer(Modifier.weight(1f))
 
         ShizziIconButton(
-            icon = Icons.Filled.BarChart,
-            contentDescription = tr("Usage history"),
-            onClick = onOpenHistory,
-            tint = ShizziTheme.colors.onSurfaceMuted,
-        )
-
-        ShizziIconButton(
-            icon = Icons.Filled.Settings,
-            contentDescription = tr("Settings"),
-            onClick = onOpenSettings,
-            tint = ShizziTheme.colors.onSurfaceMuted,
+            icon = Icons.Filled.QrCode2,
+            contentDescription = tr("Share with a QR code", "Compartir con código QR"),
+            onClick = onShareQr,
+            tint = ShizziTheme.colors.primary,
         )
     }
 }
@@ -169,7 +181,7 @@ private fun HomeBody(state: SessionUiState, actions: HomeActions, limits: HomeLi
         isConnected -> "USB"
         state.status == UiStatus.LOADING -> "…"
         state.status == UiStatus.ERROR -> "!"
-        else -> "Shizzi"
+        else -> dev.shizzi.AppInfo.NAME
     }
     val limitProgress = if (isConnected) {
         SessionLimits.progress(

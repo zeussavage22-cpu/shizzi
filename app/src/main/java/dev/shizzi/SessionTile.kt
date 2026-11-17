@@ -12,7 +12,7 @@ data class TileRender(
 
 object SessionTile {
 
-    const val LABEL = "Shizzi"
+    const val LABEL = AppInfo.NAME
 
     fun render(session: SessionUiState, shizuku: ShizukuState, isStopping: Boolean): TileRender {
         if (shizuku !is ShizukuState.Ready) return unavailable(shizuku)

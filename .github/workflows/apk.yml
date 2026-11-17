@@ -94,8 +94,8 @@ jobs:
       - name: Collect APKs
         run: |
           mkdir -p out
-          cp app/build/outputs/apk/release/app-release.apk out/shizzi-mejorado.apk
-          cp app/build/outputs/apk/debug/app-debug.apk out/shizzi-mejorado-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk out/condor.apk
+          cp app/build/outputs/apk/debug/app-debug.apk out/condor-debug.apk
           ls -la out
 
       - name: Upload artifacts
@@ -113,8 +113,8 @@ jobs:
           gh release create "$TAG" out/*.apk \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
-            --title "Shizzi mejorado (compilación ${{ github.run_number }})" \
-            --notes "APK compilado automáticamente desde ${{ github.ref_name }}. Instala **shizzi-mejorado.apk** (optimizado). Si algo no funciona, prueba **shizzi-mejorado-debug.apk**." \
+            --title "Cóndor (compilación ${{ github.run_number }})" \
+            --notes "APK compilado automáticamente desde ${{ github.ref_name }}. Instala **condor.apk** (optimizado). Si algo no funciona, prueba **condor-debug.apk**." \
             --prerelease
 
       - name: Clean up signing material

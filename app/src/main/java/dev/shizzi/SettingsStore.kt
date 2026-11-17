@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 data class Settings(
-    val theme: ThemeChoice = ThemeChoice.SYSTEM,
+    val theme: ThemeChoice = ThemeChoice.DARK,
     val design: DesignLanguage = DesignLanguage.MATERIAL_EXPRESSIVE,
     val accent: AccentChoice = AccentChoice.Default,
     val customAccents: List<Int> = emptyList(),
@@ -50,6 +50,10 @@ data class Settings(
 
     /** Notify when a device joins or leaves the hotspot. */
     val notifyDevices: Boolean = false,
+
+    /** Hotspot name and password typed by the user, only for the QR code. */
+    val hotspotSsid: String = "",
+    val hotspotPassword: String = "",
 )
 
 const val DEFAULT_SCHEDULE_START = 8 * 60
@@ -136,6 +140,13 @@ class SettingsStore(private val context: Context) {
         }
     }
 
+    suspend fun setHotspotCredentials(ssid: String, password: String) {
+        context.dataStore.edit {
+            it[HOTSPOT_SSID] = ssid
+            it[HOTSPOT_PASSWORD] = password
+        }
+    }
+
     suspend fun setNotifyDevices(isEnabled: Boolean) {
         context.dataStore.edit { it[NOTIFY_DEVICES] = isEnabled }
     }
@@ -174,10 +185,12 @@ internal val SCHEDULE_ENABLED = booleanPreferencesKey("schedule_enabled")
 internal val SCHEDULE_START = intPreferencesKey("schedule_start_minute")
 internal val SCHEDULE_STOP = intPreferencesKey("schedule_stop_minute")
 internal val NOTIFY_DEVICES = booleanPreferencesKey("notify_devices")
+internal val HOTSPOT_SSID = stringPreferencesKey("hotspot_ssid")
+internal val HOTSPOT_PASSWORD = stringPreferencesKey("hotspot_password")
 
 internal fun toSettings(preferences: Preferences) = Settings(
     theme = runCatching { ThemeChoice.valueOf(preferences[THEME].orEmpty()) }
-        .getOrDefault(ThemeChoice.SYSTEM),
+        .getOrDefault(ThemeChoice.DARK),
     design = runCatching { DesignLanguage.valueOf(preferences[DESIGN].orEmpty()) }
         .getOrDefault(DesignLanguage.MATERIAL_EXPRESSIVE),
     accent = parseAccent(preferences[ACCENT]),
@@ -196,4 +209,6 @@ internal fun toSettings(preferences: Preferences) = Settings(
     scheduleStartMinute = (preferences[SCHEDULE_START] ?: DEFAULT_SCHEDULE_START).coerceIn(0, 24 * 60 - 1),
     scheduleStopMinute = (preferences[SCHEDULE_STOP] ?: DEFAULT_SCHEDULE_STOP).coerceIn(0, 24 * 60 - 1),
     notifyDevices = preferences[NOTIFY_DEVICES] ?: false,
+    hotspotSsid = preferences[HOTSPOT_SSID].orEmpty(),
+    hotspotPassword = preferences[HOTSPOT_PASSWORD].orEmpty(),
 )

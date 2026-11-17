@@ -17,6 +17,9 @@ import androidx.core.view.WindowCompat
 import dev.shizzi.ui.Screen
 import dev.shizzi.ui.theme.Appearance
 import dev.shizzi.ui.theme.ShizziTheme
+import dev.shizzi.ui.theme.condorBackdrop
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import rikka.shizuku.Shizuku
 
 class MainActivity : ComponentActivity() {
@@ -76,7 +79,7 @@ class MainActivity : ComponentActivity() {
                         .isAppearanceLightStatusBars = !colors.isDark
                 }
 
-                Surface(color = colors.background) {
+                Surface(color = Color.Transparent, modifier = Modifier.condorBackdrop(colors)) {
                     val state by viewModel.state.collectAsState()
                     val diagnostics by viewModel.diagnosticsState.collectAsState()
                     val compatibility by viewModel.compatibilityState.collectAsState()
@@ -125,6 +128,8 @@ class MainActivity : ComponentActivity() {
                             onSetIdleStop = viewModel::setIdleStop,
                             onSetSchedule = viewModel::setSchedule,
                             onSetNotifyDevices = viewModel::setNotifyDevices,
+                            onSaveHotspotCredentials = viewModel::setHotspotCredentials,
+                            onRunSpeedTest = viewModel::runSpeedTest,
                         ),
                         startScreen = startScreen,
                     )

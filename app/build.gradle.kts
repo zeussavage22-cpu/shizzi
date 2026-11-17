@@ -56,12 +56,12 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dev.shizzi"
+        applicationId = "dev.condor.hotspot"
 
         minSdk = 30
         targetSdk = 35
         versionCode = 7
-        versionName = "0.5.0-mejorado.3"
+        versionName = "1.0.0"
 
         buildConfigField("int", "SERVICE_BUILD_ID", "${sourceFingerprint(projectDir)}")
 
@@ -155,6 +155,8 @@ dependencies {
     implementation("dev.rikka.shizuku:provider:13.1.5")
 
     implementation("org.lsposed.hiddenapibypass:hiddenapibypass:4.3")
+
+    implementation("com.google.zxing:core:3.5.3")
 
     testImplementation("junit:junit:4.13.2")
 

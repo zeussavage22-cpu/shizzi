@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import dev.shizzi.ui.theme.MinTouchTarget
 import dev.shizzi.ui.theme.ShizziTheme
@@ -33,6 +35,7 @@ fun ConnectButton(
     onClick: () -> Unit,
 ) {
     val interaction = remember { MutableInteractionSource() }
+    val haptics = LocalHapticFeedback.current
     val colors = ShizziTheme.colors
     val isEnabled = state != ConnectButtonState.DISABLED &&
         state != ConnectButtonState.LOADING
@@ -52,7 +55,10 @@ fun ConnectButton(
                 enabled = isEnabled,
                 interactionSource = interaction,
                 indication = themedIndication(),
-                onClick = onClick,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onClick()
+                },
             ),
         contentAlignment = Alignment.Center,
     ) {

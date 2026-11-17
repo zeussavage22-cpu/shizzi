@@ -15,7 +15,7 @@ import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.SchemeExpressive
 import com.materialkolor.scheme.SchemeTonalSpot
 
-private const val DefaultSeed = 0xFF14B8A6.toInt()
+private const val DefaultSeed = 0xFF6D5EFC.toInt()
 
 // The Default swatch shows the app's own teal, which does not move with the
 // active accent.

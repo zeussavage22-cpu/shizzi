@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_start">Compartir</string>
+    <string name="shortcut_start_long">Empezar a compartir internet</string>
+    <string name="shortcut_stop">Dejar de compartir</string>
+    <string name="shortcut_stop_long">Dejar de compartir internet</string>
+</resources>

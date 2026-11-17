@@ -13,6 +13,16 @@ import dev.shizzi.ui.HomeActions
 import dev.shizzi.ui.HistoryPage
 import dev.shizzi.ui.HomeLimits
 import dev.shizzi.ui.HomePage
+import dev.shizzi.ui.CondorNavBar
+import dev.shizzi.ui.SpeedTestPage
+import dev.shizzi.ui.TopLevelScreens
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import dev.shizzi.ui.ScheduleActions
 import dev.shizzi.ui.ScheduleState
 import dev.shizzi.ui.LimitsActions
@@ -63,6 +73,8 @@ data class AppActions(
     val onSetIdleStop: (Int) -> Unit = {},
     val onSetSchedule: (Boolean, Int, Int) -> Unit = { _, _, _ -> },
     val onSetNotifyDevices: (Boolean) -> Unit = {},
+    val onSaveHotspotCredentials: (String, String) -> Unit = { _, _ -> },
+    val onRunSpeedTest: () -> Unit = {},
 )
 
 
@@ -92,17 +104,36 @@ fun HomeScreen(state: AppState, actions: AppActions, startScreen: Screen = Scree
         onDismiss = actions.onDismissDiagnostics,
     )
 
+    val hasNavBar = current.value in TopLevelScreens
+
     Box(modifier = Modifier.fillMaxSize()) {
-        ScreenHost(current = current.value) { screen ->
-            ScreenBody(
-                screen = screen,
-                context = ScreenContext(state, actions, toasts, navigation),
-            )
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .then(
+                        if (hasNavBar) Modifier.consumeWindowInsets(WindowInsets.navigationBars) else Modifier,
+                    ),
+            ) {
+                ScreenHost(current = current.value) { screen ->
+                    ScreenBody(
+                        screen = screen,
+                        context = ScreenContext(state, actions, toasts, navigation),
+                    )
+                }
+            }
+
+            AnimatedVisibility(visible = hasNavBar) {
+                CondorNavBar(current = current.value, onSelect = { current.value = it })
+            }
         }
 
         ToastHost(
             state = toasts,
-            modifier = Modifier.align(Alignment.BottomCenter).systemBarsPadding(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .systemBarsPadding()
+                .padding(bottom = if (hasNavBar) 84.dp else 0.dp),
         )
     }
 }
@@ -127,6 +158,7 @@ private fun ScreenBody(screen: Screen, context: ScreenContext) {
         Screen.SETTINGS -> SettingsRoute(context)
         Screen.LOG -> LogRoute(context)
         Screen.EASTER_EGG -> EasterEggPage(onDismiss = context.navigation.goHome)
+        Screen.SPEED_TEST -> SpeedTestPage(onStart = context.actions.onRunSpeedTest)
         Screen.HISTORY -> HistoryPage(
             onClear = context.actions.onClearHistory,
             onBack = context.navigation.goHome,
@@ -146,7 +178,9 @@ private fun HomeRoute(context: ScreenContext) {
             onOpenSettings = { context.navigation.open(Screen.SETTINGS) },
             onOpenEasterEgg = { context.navigation.open(Screen.EASTER_EGG) },
             onOpenHistory = { context.navigation.open(Screen.HISTORY) },
+            onSaveHotspotCredentials = actions.onSaveHotspotCredentials,
         ),
+        hotspot = context.state.settings.hotspotSsid to context.state.settings.hotspotPassword,
         limits = HomeLimits(
             timeLimitMinutes = context.state.settings.timeLimitMinutes,
             dataLimitMb = context.state.settings.dataLimitMb,

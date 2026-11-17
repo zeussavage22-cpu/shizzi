@@ -130,6 +130,15 @@ class SessionViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { settingsStore.setNotifyDevices(isEnabled) }
     }
 
+    fun setHotspotCredentials(ssid: String, password: String) {
+        viewModelScope.launch { settingsStore.setHotspotCredentials(ssid, password) }
+    }
+
+    fun runSpeedTest() {
+        if (SpeedTest.state.value.isRunning) return
+        viewModelScope.launch { SpeedTest.run() }
+    }
+
     fun clearHistory() {
         UsageHistory.clear(getApplication())
     }
