@@ -13,6 +13,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import android.hardware.biometrics.BiometricManager
+import android.hardware.biometrics.BiometricPrompt
+import android.os.CancellationSignal
+import dev.shizzi.ui.LockScreen
 import androidx.core.view.WindowCompat
 import dev.shizzi.ui.Screen
 import dev.shizzi.ui.theme.Appearance
@@ -85,6 +92,12 @@ class MainActivity : ComponentActivity() {
                     val compatibility by viewModel.compatibilityState.collectAsState()
                     val permissions by viewModel.permissionState.collectAsState()
 
+                    if (loaded.appLock && !isUnlocked) {
+                        LockScreen(onUnlock = ::authenticate)
+                        LaunchedEffect(Unit) { authenticate() }
+                        return@Surface
+                    }
+
                     ShizziApp(
                         state = AppState(
                             session = state,
@@ -130,6 +143,8 @@ class MainActivity : ComponentActivity() {
                             onSetNotifyDevices = viewModel::setNotifyDevices,
                             onSaveHotspotCredentials = viewModel::setHotspotCredentials,
                             onRunSpeedTest = viewModel::runSpeedTest,
+                            onSetQuota = viewModel::setQuota,
+                            onSetAppLock = viewModel::setAppLock,
                         ),
                         startScreen = startScreen,
                     )
@@ -236,6 +251,53 @@ class MainActivity : ComponentActivity() {
         Shizuku.addBinderDeadListener(binderDeadListener)
     }
 
+    /** Whether the app lock has been passed; resets after a while in the background. */
+    private var isUnlocked by mutableStateOf(false)
+    private var stoppedAt = 0L
+
+    override fun onStop() {
+        super.onStop()
+        stoppedAt = System.currentTimeMillis()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (stoppedAt > 0 && System.currentTimeMillis() - stoppedAt > RELOCK_AFTER_MS) isUnlocked = false
+    }
+
+    private fun authenticate() {
+        val prompt = BiometricPrompt.Builder(this)
+            .setTitle(AppInfo.NAME)
+            .setSubtitle(tr("Unlock to continue", "Desbloquea para continuar"))
+            .setAllowedAuthenticators(
+                BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+            )
+            .build()
+
+        runCatching {
+            prompt.authenticate(
+                CancellationSignal(),
+                mainExecutor,
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                        isUnlocked = true
+                    }
+
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                        // A phone with no screen lock at all cannot be locked out of the app.
+                        if (errorCode == BiometricPrompt.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL ||
+                            errorCode == BiometricPrompt.BIOMETRIC_ERROR_HW_NOT_PRESENT ||
+                            errorCode == BiometricPrompt.BIOMETRIC_ERROR_NO_BIOMETRICS
+                        ) {
+                            isUnlocked = true
+                        }
+                    }
+                },
+            )
+        }.onFailure { isUnlocked = true }
+    }
+
     override fun onResume() {
         super.onResume()
         viewModel.refreshShizukuState()
@@ -247,5 +309,9 @@ class MainActivity : ComponentActivity() {
         Shizuku.removeBinderReceivedListener(binderReceivedListener)
         Shizuku.removeBinderDeadListener(binderDeadListener)
         super.onDestroy()
+    }
+
+    private companion object {
+        const val RELOCK_AFTER_MS = 60_000L
     }
 }

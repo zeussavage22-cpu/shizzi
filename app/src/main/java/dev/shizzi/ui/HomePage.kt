@@ -58,7 +58,12 @@ private fun buttonState(state: SessionUiState): ConnectButtonState = when {
 }
 
 /** The user's optional limits, shown as an outer arc on the ring. */
-data class HomeLimits(val timeLimitMinutes: Int = 0, val dataLimitMb: Int = 0)
+data class HomeLimits(
+    val timeLimitMinutes: Int = 0,
+    val dataLimitMb: Int = 0,
+    val quotaMb: Int = 0,
+    val quotaResetDay: Int = 1,
+)
 
 @Composable
 fun HomePage(
@@ -223,6 +228,14 @@ private fun HomeBody(state: SessionUiState, actions: HomeActions, limits: HomeLi
             RiseIn(isVisible = isStarting) {
                 CancelButton(onClick = actions.onCancel)
             }
+        }
+
+        if (limits.quotaMb > 0) {
+            QuotaCard(
+                quotaMb = limits.quotaMb,
+                resetDay = limits.quotaResetDay,
+                modifier = Modifier.padding(bottom = ShizziTheme.spacing.sm),
+            )
         }
 
         RiseIn(isVisible = isConnected) {

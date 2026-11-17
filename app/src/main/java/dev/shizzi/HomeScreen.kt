@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import dev.shizzi.ui.ScheduleActions
+import dev.shizzi.ui.PlanActions
+import dev.shizzi.ui.PlanState
 import dev.shizzi.ui.ScheduleState
 import dev.shizzi.ui.LimitsActions
 import dev.shizzi.ui.LimitsState
@@ -75,6 +77,8 @@ data class AppActions(
     val onSetNotifyDevices: (Boolean) -> Unit = {},
     val onSaveHotspotCredentials: (String, String) -> Unit = { _, _ -> },
     val onRunSpeedTest: () -> Unit = {},
+    val onSetQuota: (Int, Int, Boolean) -> Unit = { _, _, _ -> },
+    val onSetAppLock: (Boolean) -> Unit = {},
 )
 
 
@@ -184,6 +188,8 @@ private fun HomeRoute(context: ScreenContext) {
         limits = HomeLimits(
             timeLimitMinutes = context.state.settings.timeLimitMinutes,
             dataLimitMb = context.state.settings.dataLimitMb,
+            quotaMb = context.state.settings.monthlyQuotaMb,
+            quotaResetDay = context.state.settings.quotaResetDay,
         ),
     )
 }
@@ -228,6 +234,12 @@ private fun settingsState(state: AppState): SettingsState {
             stopMinute = settings.scheduleStopMinute,
             notifyDevices = settings.notifyDevices,
         ),
+        plan = PlanState(
+            quotaMb = settings.monthlyQuotaMb,
+            resetDay = settings.quotaResetDay,
+            autoStop = settings.quotaAutoStop,
+            appLock = settings.appLock,
+        ),
     )
 }
 
@@ -260,6 +272,10 @@ private fun settingsActions(context: ScreenContext): SettingsActions {
         schedule = ScheduleActions(
             onSetSchedule = actions.onSetSchedule,
             onSetNotifyDevices = actions.onSetNotifyDevices,
+        ),
+        plan = PlanActions(
+            onSetQuota = actions.onSetQuota,
+            onSetAppLock = actions.onSetAppLock,
         ),
     )
 }

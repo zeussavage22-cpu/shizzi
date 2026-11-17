@@ -54,6 +54,14 @@ data class Settings(
     /** Hotspot name and password typed by the user, only for the QR code. */
     val hotspotSsid: String = "",
     val hotspotPassword: String = "",
+
+    /** Monthly data plan in megabytes (0 = off), the day it renews, and whether to stop at it. */
+    val monthlyQuotaMb: Int = 0,
+    val quotaResetDay: Int = 1,
+    val quotaAutoStop: Boolean = false,
+
+    /** Ask for the fingerprint / screen lock before showing the app. */
+    val appLock: Boolean = false,
 )
 
 const val DEFAULT_SCHEDULE_START = 8 * 60
@@ -147,6 +155,18 @@ class SettingsStore(private val context: Context) {
         }
     }
 
+    suspend fun setQuota(megabytes: Int, resetDay: Int, autoStop: Boolean) {
+        context.dataStore.edit {
+            it[MONTHLY_QUOTA_MB] = megabytes.coerceAtLeast(0)
+            it[QUOTA_RESET_DAY] = resetDay.coerceIn(1, 28)
+            it[QUOTA_AUTO_STOP] = autoStop
+        }
+    }
+
+    suspend fun setAppLock(isEnabled: Boolean) {
+        context.dataStore.edit { it[APP_LOCK] = isEnabled }
+    }
+
     suspend fun setNotifyDevices(isEnabled: Boolean) {
         context.dataStore.edit { it[NOTIFY_DEVICES] = isEnabled }
     }
@@ -187,6 +207,10 @@ internal val SCHEDULE_STOP = intPreferencesKey("schedule_stop_minute")
 internal val NOTIFY_DEVICES = booleanPreferencesKey("notify_devices")
 internal val HOTSPOT_SSID = stringPreferencesKey("hotspot_ssid")
 internal val HOTSPOT_PASSWORD = stringPreferencesKey("hotspot_password")
+internal val MONTHLY_QUOTA_MB = intPreferencesKey("monthly_quota_mb")
+internal val QUOTA_RESET_DAY = intPreferencesKey("quota_reset_day")
+internal val QUOTA_AUTO_STOP = booleanPreferencesKey("quota_auto_stop")
+internal val APP_LOCK = booleanPreferencesKey("app_lock")
 
 internal fun toSettings(preferences: Preferences) = Settings(
     theme = runCatching { ThemeChoice.valueOf(preferences[THEME].orEmpty()) }
@@ -211,4 +235,8 @@ internal fun toSettings(preferences: Preferences) = Settings(
     notifyDevices = preferences[NOTIFY_DEVICES] ?: false,
     hotspotSsid = preferences[HOTSPOT_SSID].orEmpty(),
     hotspotPassword = preferences[HOTSPOT_PASSWORD].orEmpty(),
+    monthlyQuotaMb = (preferences[MONTHLY_QUOTA_MB] ?: 0).coerceAtLeast(0),
+    quotaResetDay = (preferences[QUOTA_RESET_DAY] ?: 1).coerceIn(1, 28),
+    quotaAutoStop = preferences[QUOTA_AUTO_STOP] ?: false,
+    appLock = preferences[APP_LOCK] ?: false,
 )

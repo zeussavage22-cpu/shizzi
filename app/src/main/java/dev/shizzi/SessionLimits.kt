@@ -1,7 +1,7 @@
 package dev.shizzi
 
 /** Why a session was stopped automatically. */
-enum class LimitReason { TIME, DATA, BATTERY, IDLE }
+enum class LimitReason { TIME, DATA, BATTERY, IDLE, QUOTA }
 
 /**
  * Optional, user-chosen limits that end a sharing session on their own.
@@ -21,6 +21,14 @@ object SessionLimits {
 
     /** Choices offered for stopping with no devices connected, in minutes. 0 means off. */
     val IDLE_OPTIONS_MINUTES = listOf(0, 3, 5, 10, 15, 30, 60)
+
+    /** Choices for the monthly data plan, in megabytes. 0 means off. */
+    val QUOTA_OPTIONS_MB = listOf(0, 1_000, 2_000, 3_000, 5_000, 10_000, 15_000, 20_000, 30_000, 50_000, 100_000)
+
+    fun quotaLabel(megabytes: Int): String = when {
+        megabytes <= 0 -> tr("Off")
+        else -> Traffic.format(megabytes * 1_000_000L)
+    }
 
     /**
      * True once a connected session has had no device for [idleMinutes] minutes.
@@ -93,6 +101,7 @@ object SessionLimits {
         LimitReason.DATA -> tr("Data limit reached")
         LimitReason.BATTERY -> tr("Battery is low")
         LimitReason.IDLE -> tr("No devices connected for a while")
+        LimitReason.QUOTA -> tr("Monthly data plan used up", "Se agotó tu plan de datos del mes")
     }
 
     /**

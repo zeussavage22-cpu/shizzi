@@ -58,6 +58,14 @@ class SessionService : Service() {
     @Volatile
     private var notifyDevices = false
 
+    @Volatile
+    private var quota = Triple(0, 1, false)
+
+    /** Live speed for the notification, from the change between status updates. */
+    private var lastTraffic = -1L
+    private var lastTrafficAt = 0L
+    private var speedBytesPerSecond = 0L
+
     /** Last time a device was connected (or the session started), for the idle stop. */
     private var lastActiveAt = 0L
 
@@ -86,6 +94,7 @@ class SessionService : Service() {
                 batteryLimitPercent = settings.batteryLimitPercent
                 idleStopMinutes = settings.idleStopMinutes
                 notifyDevices = settings.notifyDevices
+                quota = Triple(settings.monthlyQuotaMb, settings.quotaResetDay, settings.quotaAutoStop)
             }
         }
     }
@@ -103,7 +112,8 @@ class SessionService : Service() {
         }
 
         val battery = readBattery()
-        val reason = (if (SessionLimits.idleReached(idleStopMinutes, state, lastActiveAt, now)) LimitReason.IDLE else null)
+        val reason = checkQuota(state)
+            ?: (if (SessionLimits.idleReached(idleStopMinutes, state, lastActiveAt, now)) LimitReason.IDLE else null)
             ?: SessionLimits.reached(
             timeLimitMinutes = timeLimitMinutes,
             dataLimitMb = dataLimitMb,
@@ -124,6 +134,28 @@ class SessionService : Service() {
             .onFailure { SessionLog.error("could not stop at limit: ${it.message}") }
     }
 
+    /**
+     * Warns once per cycle at 80% of the monthly plan, and returns QUOTA once it is used up
+     * if the user asked to stop there.
+     */
+    private fun checkQuota(state: SessionUiState): LimitReason? {
+        val (megabytes, resetDay, autoStop) = quota
+        if (megabytes <= 0 || state.status != UiStatus.CONNECTED) return null
+
+        val today = java.time.LocalDate.now()
+        val used = UsageHistory.ledger.value.cycleTotal(today, resetDay)
+        val limit = megabytes * 1_000_000L
+        val cycle = UsageLedger.cycleStart(today, resetDay).toString()
+
+        if (used >= limit * 8 / 10 && QuotaWarnings.shouldWarn(this, cycle)) {
+            notificationManager().notify(
+                QUOTA_NOTIFICATION_ID,
+                notification.buildQuotaWarning(used, limit),
+            )
+        }
+        return if (autoStop && used >= limit) LimitReason.QUOTA else null
+    }
+
     /** Battery percent (or -1 if unknown) and whether the phone is charging. */
     private fun readBattery(): Pair<Int, Boolean> {
         if (batteryLimitPercent <= 0) return -1 to false
@@ -136,7 +168,24 @@ class SessionService : Service() {
     /** Records usage history; never lets a history problem disturb the session. */
     private fun recordUsage() {
         runCatching { usage.observe(internalState.value) }
+        runCatching { measureSpeed() }
         runCatching { announceDeviceChanges() }
+    }
+
+    private fun measureSpeed() {
+        val state = internalState.value
+        val now = System.currentTimeMillis()
+        val total = state.traffic.up + state.traffic.down
+        if (state.status != UiStatus.CONNECTED) {
+            lastTraffic = -1L
+            speedBytesPerSecond = 0L
+            return
+        }
+        if (lastTraffic >= 0 && now > lastTrafficAt && total >= lastTraffic) {
+            speedBytesPerSecond = (total - lastTraffic) * 1000 / (now - lastTrafficAt)
+        }
+        lastTraffic = total
+        lastTrafficAt = now
     }
 
     /** Optional notice when a device joins or leaves. */
@@ -325,7 +374,7 @@ class SessionService : Service() {
     private fun publishState() {
         notificationManager().notify(
             NOTIFICATION_ID,
-            notification.build(internalState.value, isStopping),
+            notification.build(internalState.value, isStopping, speedBytesPerSecond),
         )
         runCatching { ShizziWidget.refresh(this, internalState.value) }
     }
@@ -346,6 +395,7 @@ class SessionService : Service() {
         private const val NOTIFICATION_ID = 1
         private const val LIMIT_NOTIFICATION_ID = 2
         private const val DEVICE_NOTIFICATION_ID = 3
+        private const val QUOTA_NOTIFICATION_ID = 4
         const val ACTION_STOP = "dev.shizzi.STOP_SESSION"
         const val EXTRA_REPORT_AS = "reportAs"
 

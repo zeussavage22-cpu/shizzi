@@ -129,7 +129,7 @@ fun LimitsSection(state: LimitsState, actions: LimitsActions) {
 }
 
 @Composable
-private fun OptionPicker(
+fun OptionPicker(
     title: String,
     options: List<Int>,
     selected: Int,

@@ -67,6 +67,22 @@ data class UsageLedger(
             day to bytesOn(day)
         }
 
+    /** Total since the data plan last renewed on [resetDay] (1..28). */
+    fun cycleTotal(today: LocalDate, resetDay: Int): Long {
+        val start = cycleStart(today, resetDay)
+        return days.entries.sumOf { (key, bytes) ->
+            val day = runCatching { LocalDate.parse(key) }.getOrNull()
+            if (day != null && !day.isBefore(start) && !day.isAfter(today)) bytes else 0L
+        }
+    }
+
+    /** Longest session, the one that moved the most data, and the most devices at once. */
+    fun records(): Records = Records(
+        longest = sessions.maxByOrNull { it.durationMs },
+        biggest = sessions.maxByOrNull { it.bytes },
+        mostDevices = sessions.maxOfOrNull { it.peakDevices } ?: 0,
+    )
+
     fun toJson(): String {
         val root = JSONObject()
         val dayJson = JSONObject()
@@ -115,10 +131,19 @@ data class UsageLedger(
             }.getOrDefault(UsageLedger())
         }
 
+        /** First day of the data-plan cycle that contains [today]. */
+        fun cycleStart(today: LocalDate, resetDay: Int): LocalDate {
+            val day = resetDay.coerceIn(1, 28)
+            val thisMonth = today.withDayOfMonth(day)
+            return if (today.dayOfMonth >= day) thisMonth else thisMonth.minusMonths(1)
+        }
+
         fun dayOf(millis: Long, zone: ZoneId = ZoneId.systemDefault()): LocalDate =
             Instant.ofEpochMilli(millis).atZone(zone).toLocalDate()
     }
 }
+
+data class Records(val longest: SessionRecord?, val biggest: SessionRecord?, val mostDevices: Int)
 
 /** App-wide usage history, persisted in a private preferences file. */
 object UsageHistory {
@@ -222,5 +247,18 @@ class UsageRecorder(private val context: Context) {
 
     private companion object {
         const val SAVE_EVERY_MS = 30_000L
+    }
+}
+
+/** Remembers which data-plan cycle has already been warned about, so the warning shows once. */
+object QuotaWarnings {
+    private const val PREFS = "usage_history"
+    private const val KEY = "quota_warned_cycle"
+
+    fun shouldWarn(context: Context, cycle: String): Boolean {
+        val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (prefs.getString(KEY, null) == cycle) return false
+        prefs.edit().putString(KEY, cycle).apply()
+        return true
     }
 }

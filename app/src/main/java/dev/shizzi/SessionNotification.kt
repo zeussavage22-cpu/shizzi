@@ -10,10 +10,16 @@ import android.os.Build
 
 class SessionNotification(private val context: Context) {
 
-    fun build(state: SessionUiState, isStopping: Boolean): Notification {
+    fun build(state: SessionUiState, isStopping: Boolean, speedBytesPerSecond: Long = 0L): Notification {
         createChannel()
 
-        val text = bodyFor(state, isStopping)
+        val text = bodyFor(state, isStopping).let { body ->
+            if (state.status == UiStatus.CONNECTED && speedBytesPerSecond > 0 && state.lastError.isEmpty()) {
+                "$body · \u26A1 ${Traffic.format(speedBytesPerSecond)}/s"
+            } else {
+                body
+            }
+        }
 
         return Notification.Builder(context, CHANNEL_ID)
             .setContentTitle(titleFor(state, isStopping))
@@ -23,6 +29,25 @@ class SessionNotification(private val context: Context) {
             .setContentIntent(openAppIntent())
             .setOngoing(state.status != UiStatus.ERROR)
             .addAction(stopAction())
+            .build()
+    }
+
+    /** Heads-up that the monthly data plan is nearly (or fully) used. */
+    fun buildQuotaWarning(used: Long, limit: Long): Notification {
+        createAlertChannel()
+        val percent = (used * 100 / limit.coerceAtLeast(1)).coerceAtMost(999)
+
+        return Notification.Builder(context, ALERT_CHANNEL_ID)
+            .setContentTitle(tr("Data plan at $percent%", "Plan de datos al $percent%"))
+            .setContentText(
+                tr(
+                    "${Traffic.format(used)} of ${Traffic.format(limit)} shared this cycle",
+                    "${Traffic.format(used)} de ${Traffic.format(limit)} compartidos en este ciclo",
+                ),
+            )
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setContentIntent(openAppIntent())
+            .setAutoCancel(true)
             .build()
     }
 

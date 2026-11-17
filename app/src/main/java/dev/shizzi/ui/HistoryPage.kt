@@ -14,7 +14,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.DataUsage
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -76,6 +79,8 @@ fun HistoryPage(onClear: () -> Unit, onBack: () -> Unit) {
             }
 
             DailyChart(ledger.series(today, ChartDays))
+
+            RecordsRow(ledger.records())
 
             SectionLabel(tr("Recent sessions"))
 
@@ -156,6 +161,34 @@ private fun DailyChart(series: List<Pair<LocalDate, Long>>) {
                 color = ShizziTheme.colors.onSurfaceMuted,
             )
         }
+    }
+}
+
+@Composable
+private fun RecordsRow(records: dev.shizzi.Records) {
+    if (records.longest == null) return
+    val gap = ShizziTheme.spacing.sm
+
+    SectionLabel(tr("Records", "Récords"))
+    Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+        StatTile(
+            androidx.compose.material.icons.Icons.Filled.EmojiEvents,
+            tr("Longest", "Más larga"),
+            SessionLimits.formatElapsed(records.longest.durationMs),
+            Modifier.weight(1f),
+        )
+        StatTile(
+            androidx.compose.material.icons.Icons.Filled.DataUsage,
+            tr("Most data", "Más datos"),
+            Traffic.format(records.biggest?.bytes ?: 0),
+            Modifier.weight(1f),
+        )
+        StatTile(
+            androidx.compose.material.icons.Icons.Filled.Devices,
+            tr("Most devices", "Más equipos"),
+            records.mostDevices.toString(),
+            Modifier.weight(1f),
+        )
     }
 }
 
