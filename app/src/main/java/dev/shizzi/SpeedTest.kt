@@ -160,9 +160,9 @@ object SpeedTest {
             setFixedLengthStreamingMode(UPLOAD_CHUNK)
             setRequestProperty("Content-Type", "application/octet-stream")
         }
+        var sent = 0
         try {
             connection.outputStream.use { output ->
-                var sent = 0
                 while (sent < UPLOAD_CHUNK) {
                     val size = minOf(uploadPayload.size, UPLOAD_CHUNK - sent)
                     output.write(uploadPayload, 0, size)
