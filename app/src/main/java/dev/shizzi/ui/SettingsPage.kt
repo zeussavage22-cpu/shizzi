@@ -39,9 +39,9 @@ import dev.shizzi.ui.theme.ShizziTheme
 import dev.shizzi.ui.theme.ThemeChoice
 import dev.shizzi.ui.theme.standardTween
 
-private const val SOURCE_URL = "https://github.com/carlelieser/shizzi"
-private const val ISSUE_URL = "https://github.com/carlelieser/shizzi/issues/new"
-private const val AUTHOR_URL = "https://carlelieser.dev"
+private const val SOURCE_URL = "https://github.com/zeussavage22-cpu/shizzi/tree/condor"
+private const val CREATOR_URL = "https://github.com/zeussavage22-cpu"
+private const val BASED_ON_URL = "https://github.com/carlelieser/shizzi"
 
 private const val BusyAlpha = 0.4f
 
@@ -271,20 +271,26 @@ private fun AboutSection(toasts: ToastState) {
     }
 
     SettingsAction(
-        label = SettingsText(title = "GitHub"),
+        label = SettingsText(
+            title = tr("Created by", "Creada por"),
+            subtitle = "zeussavage22 · ${dev.shizzi.AppInfo.NAME} ${dev.shizzi.BuildConfig.VERSION_NAME}",
+        ),
+        isExternal = true,
+        onClick = { open("GitHub", CREATOR_URL) },
+    )
+
+    SettingsAction(
+        label = SettingsText(title = tr("Source code", "Código fuente")),
         isExternal = true,
         onClick = { open("GitHub", SOURCE_URL) },
     )
 
     SettingsAction(
-        label = SettingsText(title = tr("Report a bug")),
+        label = SettingsText(
+            title = tr("Based on Shizzi", "Basada en Shizzi"),
+            subtitle = tr("Tethering engine by carlelieser", "Motor de conexión de carlelieser"),
+        ),
         isExternal = true,
-        onClick = { open(tr("the issue tracker"), ISSUE_URL) },
-    )
-
-    SettingsAction(
-        label = SettingsText(title = tr("Author"), subtitle = "carlelieser.dev"),
-        isExternal = true,
-        onClick = { open("carlelieser.dev", AUTHOR_URL) },
+        onClick = { open("Shizzi", BASED_ON_URL) },
     )
 }
