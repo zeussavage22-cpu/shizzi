@@ -60,6 +60,6 @@ val DarkColors = ShizziColors(
     onPrimaryContainer = Color(0xFFE6E1FF),
     secondary = Color(0xFF22D3EE),
     tertiary = Color(0xFF22D3EE),
-    surfaceVariant = Color(0xFF1E1C3D),
-    surfaceContainer = Color(0xFF1E1C3D),
+    surfaceVariant = Color(0xFF1A1936),
+    surfaceContainer = Color(0xFF1A1936),
 )
