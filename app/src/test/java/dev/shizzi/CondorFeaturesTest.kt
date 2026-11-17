@@ -14,7 +14,7 @@ class CondorFeaturesTest {
 
     @Test
     fun `wifi qr payload escapes reserved characters`() {
-        assertEquals("WIFI:T:WPA;S:a\;b\\:c;P:p\\,w\\\\d;;", wifiQrPayload("a;b:c", "p,w\\d"))
+        assertEquals("WIFI:T:WPA;S:a\\;b\\:c;P:p\\,w\\\\d;;", wifiQrPayload("a;b:c", "p,w\\d"))
     }
 
     @Test
