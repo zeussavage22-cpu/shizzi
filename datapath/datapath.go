@@ -52,6 +52,8 @@ func Start(tunFD int, mtu int) (*Session, error) {
 		},
 	})
 
+	tuneTCP(netStack)
+
 	endpoint, err := fdbased.New(&fdbased.Options{
 		FDs: []int{tunFD},
 		MTU: uint32(mtu),
