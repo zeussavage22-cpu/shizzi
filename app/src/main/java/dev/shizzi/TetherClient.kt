@@ -32,6 +32,9 @@ data class SessionUiState(
 
     /** Wall-clock time (ms) the session became connected, or 0 when not connected. */
     val connectedSince: Long = 0L,
+
+    /** The fast engine's kernel-TCP path is carrying IPv4 TCP. */
+    val isFastPath: Boolean = false,
 ) {
 
     val canStart: Boolean get() = shizukuState is ShizukuState.Ready && !isBusy
@@ -90,6 +93,7 @@ fun SessionUiState.applyOutcome(outcome: Result<String>): SessionUiState {
         isVpnBypassed = parsed?.optBoolean("isVpnBypassed") == true,
         isWaitingForUsb = parsed?.optBoolean("isWaitingForUsb") == true,
         clientCount = parsed?.optInt("clientCount") ?: 0,
+        isFastPath = parsed?.optBoolean("fastPath") == true,
         traffic = Traffic(
             up = parsed?.optLong("bytesUp") ?: 0,
             down = parsed?.optLong("bytesDown") ?: 0,
@@ -222,9 +226,11 @@ class TetherClient {
         logging: Boolean,
         vpnMode: VpnMode,
         usbTethering: UsbTethering,
+        fastEngine: Boolean = false,
     ): String = withContext(Dispatchers.IO) {
         val bound = service()
         verifyContract(bound)
+        bound.setFastEngine(fastEngine)
         bound.start(logging, vpnMode.name, usbTethering.name)
     }
 

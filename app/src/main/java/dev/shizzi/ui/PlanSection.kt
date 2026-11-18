@@ -13,11 +13,13 @@ data class PlanState(
     val resetDay: Int = 1,
     val autoStop: Boolean = false,
     val appLock: Boolean = false,
+    val fastEngine: Boolean = false,
 )
 
 data class PlanActions(
     val onSetQuota: (megabytes: Int, resetDay: Int, autoStop: Boolean) -> Unit = { _, _, _ -> },
     val onSetAppLock: (Boolean) -> Unit = {},
+    val onSetFastEngine: (Boolean) -> Unit = {},
 )
 
 private enum class PlanPicker { NONE, QUOTA, DAY }
@@ -55,6 +57,20 @@ fun PlanSection(state: PlanState, actions: PlanActions) {
             onCheckedChange = { actions.onSetQuota(state.quotaMb, state.resetDay, it) },
         )
     }
+
+    SettingsToggle(
+        label = SettingsText(
+            title = tr("Fast engine (experimental)", "Motor rápido (experimental)"),
+            subtitle = tr(
+                "Lets Android's own TCP carry connections: faster and steadier on weak Wi-Fi. " +
+                    "Applies on the next start; if your phone blocks it, the app falls back by itself.",
+                "Deja que el TCP de Android lleve las conexiones: más rápido y estable con Wi-Fi débil. " +
+                    "Se aplica al siguiente inicio; si tu teléfono no lo permite, la app vuelve sola al motor normal.",
+            ),
+        ),
+        isChecked = state.fastEngine,
+        onCheckedChange = actions.onSetFastEngine,
+    )
 
     SettingsToggle(
         label = SettingsText(

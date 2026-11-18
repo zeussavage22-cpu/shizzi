@@ -37,6 +37,10 @@ class TetherSession(private val context: Context) {
 
     val isActive: Boolean get() = state == SessionState.ACTIVE
 
+    /** Use the mixed engine (kernel TCP for IPv4) instead of gVisor alone. */
+    @Volatile
+    var useFastEngine = false
+
     fun start(mode: VpnMode = VpnMode.AUTO, usb: UsbTethering = UsbTethering.NEVER): String {
         if (isActive) return status()
 
@@ -84,8 +88,14 @@ class TetherSession(private val context: Context) {
         interfaceName = name
         SessionLog.info("tun up: $name (mtu $TUN_MTU, $TUN_ADDRESS, $TUN_ADDRESS_V6)")
 
-        group.startDatapath(TUN_MTU)
+        group.startDatapath(TUN_MTU, if (useFastEngine) FastPath(TUN_ADDRESS, TUN_FAKE_ADDRESS) else null)
         SessionLog.info("datapath attached to $name")
+        if (useFastEngine) {
+            SessionLog.info(
+                if (group.isFastPathActive) "fast engine: kernel TCP path active"
+                else "fast engine: probe failed, using the userspace stack for everything",
+            )
+        }
         followVpn(group)
 
         preferTestNetworks()
@@ -243,7 +253,7 @@ class TetherSession(private val context: Context) {
     }
 
     private fun sessionSummary(): String {
-        val traffic = interfaceName?.let(InterfaceCounters::read) ?: Traffic()
+        val traffic = currentTraffic()
         val elapsed = when (activeSince) {
             0L -> 0L
             else -> System.currentTimeMillis() - activeSince
@@ -262,11 +272,22 @@ class TetherSession(private val context: Context) {
         put("isVpnBound", vpn.isBound)
         put("isVpnBypassed", isVpnBypassed())
 
-        val traffic = interfaceName?.let(InterfaceCounters::read) ?: Traffic()
+        val traffic = currentTraffic()
+        put("fastPath", isActive && resources?.isFastPathActive == true)
         put("bytesUp", traffic.up)
         put("bytesDown", traffic.down)
         put("clientCount", if (isActive) downstream.countDevices(usbTethering.types) else 0)
     }.toString()
+
+    /** TUN counters, corrected for packets the fast path writes back into the TUN. */
+    private fun currentTraffic(): Traffic {
+        val raw = interfaceName?.let(InterfaceCounters::read) ?: Traffic()
+        val group = resources ?: return raw
+        return Traffic(
+            up = (raw.up - group.fastBytesDown).coerceAtLeast(0),
+            down = (raw.down - group.fastBytesUp).coerceAtLeast(0),
+        )
+    }
 
     private fun isVpnBypassed(): Boolean {
         if (vpnMode != VpnMode.NEVER) return false
@@ -283,6 +304,9 @@ class TetherSession(private val context: Context) {
     private companion object {
         const val TAG = "TetherSession"
         const val TUN_ADDRESS = "192.0.2.2"
+
+        /** Unused address in the TUN subnet; the fast path's NAT peer. */
+        const val TUN_FAKE_ADDRESS = "192.0.2.3"
         const val TUN_PREFIX_LENGTH = 24
 
         const val TUN_ADDRESS_V6 = "2001:db8::2"

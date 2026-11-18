@@ -46,6 +46,10 @@ class TetherService : ITetherService.Stub {
         runCatching { session.status() }
             .getOrElse { failure -> sessionError("getStatus", failure) }
 
+    override fun setFastEngine(enabled: Boolean) {
+        session.useFastEngine = enabled
+    }
+
     override fun setLogging(enabled: Boolean) {
         SessionLog.setEnabled(enabled)
     }

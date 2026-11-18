@@ -79,6 +79,7 @@ data class AppActions(
     val onRunSpeedTest: () -> Unit = {},
     val onSetQuota: (Int, Int, Boolean) -> Unit = { _, _, _ -> },
     val onSetAppLock: (Boolean) -> Unit = {},
+    val onSetFastEngine: (Boolean) -> Unit = {},
 )
 
 
@@ -239,6 +240,7 @@ private fun settingsState(state: AppState): SettingsState {
             resetDay = settings.quotaResetDay,
             autoStop = settings.quotaAutoStop,
             appLock = settings.appLock,
+            fastEngine = settings.fastEngine,
         ),
     )
 }
@@ -276,6 +278,7 @@ private fun settingsActions(context: ScreenContext): SettingsActions {
         plan = PlanActions(
             onSetQuota = actions.onSetQuota,
             onSetAppLock = actions.onSetAppLock,
+            onSetFastEngine = actions.onSetFastEngine,
         ),
     )
 }

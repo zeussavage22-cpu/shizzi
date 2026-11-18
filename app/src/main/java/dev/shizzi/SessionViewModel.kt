@@ -143,6 +143,10 @@ class SessionViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { settingsStore.setQuota(megabytes, resetDay, autoStop) }
     }
 
+    fun setFastEngine(isEnabled: Boolean) {
+        viewModelScope.launch { settingsStore.setFastEngine(isEnabled) }
+    }
+
     fun setAppLock(isEnabled: Boolean) {
         viewModelScope.launch { settingsStore.setAppLock(isEnabled) }
     }

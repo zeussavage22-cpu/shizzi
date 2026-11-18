@@ -62,6 +62,9 @@ data class Settings(
 
     /** Ask for the fingerprint / screen lock before showing the app. */
     val appLock: Boolean = false,
+
+    /** Experimental mixed engine: kernel TCP for IPv4, userspace for the rest. */
+    val fastEngine: Boolean = false,
 )
 
 const val DEFAULT_SCHEDULE_START = 8 * 60
@@ -163,6 +166,10 @@ class SettingsStore(private val context: Context) {
         }
     }
 
+    suspend fun setFastEngine(isEnabled: Boolean) {
+        context.dataStore.edit { it[FAST_ENGINE] = isEnabled }
+    }
+
     suspend fun setAppLock(isEnabled: Boolean) {
         context.dataStore.edit { it[APP_LOCK] = isEnabled }
     }
@@ -211,6 +218,7 @@ internal val MONTHLY_QUOTA_MB = intPreferencesKey("monthly_quota_mb")
 internal val QUOTA_RESET_DAY = intPreferencesKey("quota_reset_day")
 internal val QUOTA_AUTO_STOP = booleanPreferencesKey("quota_auto_stop")
 internal val APP_LOCK = booleanPreferencesKey("app_lock")
+internal val FAST_ENGINE = booleanPreferencesKey("fast_engine")
 
 internal fun toSettings(preferences: Preferences) = Settings(
     theme = runCatching { ThemeChoice.valueOf(preferences[THEME].orEmpty()) }
@@ -239,4 +247,5 @@ internal fun toSettings(preferences: Preferences) = Settings(
     quotaResetDay = (preferences[QUOTA_RESET_DAY] ?: 1).coerceIn(1, 28),
     quotaAutoStop = preferences[QUOTA_AUTO_STOP] ?: false,
     appLock = preferences[APP_LOCK] ?: false,
+    fastEngine = preferences[FAST_ENGINE] ?: false,
 )

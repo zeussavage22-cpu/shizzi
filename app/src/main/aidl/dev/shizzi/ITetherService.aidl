@@ -6,6 +6,8 @@ interface ITetherService {
 
     String start(boolean logging, String vpnMode, String usbTethering);
 
+    void setFastEngine(boolean enabled);
+
     void setLogging(boolean enabled);
 
     String stop();

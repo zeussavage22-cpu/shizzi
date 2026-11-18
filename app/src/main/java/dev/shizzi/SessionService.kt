@@ -252,7 +252,7 @@ class SessionService : Service() {
             val outcome = sessionLock.withLock {
                 if (attempt != generation) return@launch
                 runCatching {
-                    controller.start(settings.isLogging, settings.vpnMode, settings.usbTethering)
+                    controller.start(settings.isLogging, settings.vpnMode, settings.usbTethering, settings.fastEngine)
                 }
             }
             if (attempt != generation) return@launch

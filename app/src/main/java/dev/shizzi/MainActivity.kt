@@ -145,6 +145,7 @@ class MainActivity : ComponentActivity() {
                             onRunSpeedTest = viewModel::runSpeedTest,
                             onSetQuota = viewModel::setQuota,
                             onSetAppLock = viewModel::setAppLock,
+                            onSetFastEngine = viewModel::setFastEngine,
                         ),
                         startScreen = startScreen,
                     )

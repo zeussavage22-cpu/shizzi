@@ -61,9 +61,28 @@ class SessionResources(
             }
     }
 
-    fun startDatapath(mtu: Int) {
+    /** True when the mixed engine's kernel-TCP path passed its probe and is in use. */
+    val isFastPathActive: Boolean
+        get() = runCatching { datapathSession?.fastPathActive() == true }.getOrDefault(false)
+
+    val fastBytesUp: Long get() = runCatching { datapathSession?.fastBytesUp() ?: 0L }.getOrDefault(0L)
+
+    val fastBytesDown: Long get() = runCatching { datapathSession?.fastBytesDown() ?: 0L }.getOrDefault(0L)
+
+    fun startDatapath(mtu: Int, fastPath: FastPath? = null) {
         val descriptor = fileDescriptor
             ?: error("startDatapath: no TUN fd; acquire() must succeed first")
+
+        if (fastPath != null) {
+            val mixed = runCatching {
+                Datapath.startMixed(descriptor.fd.toLong(), mtu.toLong(), fastPath.tunAddress, fastPath.fakeAddress)
+            }
+            mixed.getOrNull()?.let {
+                datapathSession = it
+                return
+            }
+            SessionLog.warn("fast engine failed to start (${mixed.exceptionOrNull()?.message}); using the userspace stack")
+        }
 
         datapathSession = runCatching { Datapath.start(descriptor.fd.toLong(), mtu.toLong()) }
             .getOrElse { failure ->

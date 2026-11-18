@@ -30,6 +30,10 @@ const nicID tcpip.NICID = 1
 type Session struct {
 	stack   *stack.Stack
 	binding *networkBinding
+
+	// Set by StartMixed only.
+	cancel func()
+	sys    *systemStack
 }
 
 // Start builds a netstack over tunFD, already open, and attaches it to the TUN.
@@ -108,6 +112,12 @@ func (s *Session) SetNetwork(handle int64) {
 func (s *Session) Stop() {
 	if s.stack == nil {
 		return
+	}
+	if s.cancel != nil {
+		s.cancel()
+	}
+	if s.sys != nil {
+		s.sys.close()
 	}
 	s.stack.Close()
 	s.stack = nil

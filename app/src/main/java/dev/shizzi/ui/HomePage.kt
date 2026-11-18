@@ -238,6 +238,15 @@ private fun HomeBody(state: SessionUiState, actions: HomeActions, limits: HomeLi
             )
         }
 
+        RiseIn(isVisible = isConnected && state.isFastPath) {
+            Text(
+                text = tr("Fast engine active", "Motor rápido activo"),
+                style = ShizziTheme.typography.caption,
+                color = ShizziTheme.colors.secondary,
+                modifier = Modifier.padding(bottom = ShizziTheme.spacing.sm),
+            )
+        }
+
         RiseIn(isVisible = isConnected) {
             SessionStats(state = state, speed = speed)
         }
